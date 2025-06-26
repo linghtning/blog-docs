@@ -1,0 +1,61 @@
+# 依赖
+/node_modules
+/.pnp
+.pnp.js
+
+# 测试
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# 生产构建
+/build
+
+# 杂项
+.DS_Store
+*.pem
+
+# 调试和包管理器
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnpm-store/
+
+# 本地环境变量
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# 数据库
+prisma/migrations/
+
+# IDE
+.vscode/
+.idea/
+
+# 日志
+logs
+*.log
+
+# 运行时数据
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 测试
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/ 
