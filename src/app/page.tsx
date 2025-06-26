@@ -7,7 +7,7 @@ export default function HomePage() {
     <div className="container px-4 py-8 mx-auto max-w-6xl">
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold text-gray-900">
-          欢迎来到博客平台
+          欢迎来到博客平台 测试
         </h1>
         <p className="mb-8 text-xl text-gray-600">
           现代化的博客发布平台，为内容创作者提供优秀的写作发布体验
