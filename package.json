@@ -14,9 +14,10 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-
-
-    "prepare": "husky install"
+    "postinstall": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -55,10 +56,7 @@
     "zustand": "^4.4.0"
   },
   "devDependencies": {
-
-
     "@types/bcryptjs": "^2.4.0",
-
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
@@ -68,14 +66,11 @@
     "autoprefixer": "^10.4.0",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.0.0",
-    "husky": "^8.0.0",
-
     "lint-staged": "^15.0.0",
-
-
     "postcss": "^8.4.0",
     "prettier": "^3.0.0",
-    "prettier-plugin-tailwindcss": "^0.5.0"
+    "prettier-plugin-tailwindcss": "^0.5.0",
+    "simple-git-hooks": "^2.13.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
