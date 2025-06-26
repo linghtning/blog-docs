@@ -9,6 +9,11 @@ on:
 env:
   NODE_VERSION: '22'
 
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
 jobs:
   lint-and-check:
     name: 代码检查
@@ -119,6 +124,9 @@ jobs:
     name: 安全扫描
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+    permissions:
+      security-events: write
+      contents: read
 
     steps:
       - name: 检出代码
