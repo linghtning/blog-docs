@@ -5,6 +5,33 @@ import { prisma } from './db'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
+// 扩展 NextAuth 类型
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string
+      email: string
+      username: string
+      role: string
+    }
+  }
+
+  interface User {
+    id: string
+    email: string
+    username: string
+    role: string
+    avatar?: string
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    role?: string
+    username?: string
+  }
+}
+
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -17,7 +44,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/login',
-    signUp: '/auth/register',
   },
   providers: [
     CredentialsProvider({
@@ -49,7 +75,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id.toString(),
             email: user.email,
             username: user.username,
-            avatar: user.avatarUrl,
+            avatar: user.avatarUrl || undefined,
             role: user.role,
           }
         } catch {

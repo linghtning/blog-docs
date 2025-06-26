@@ -1,5 +1,17 @@
 import { User, Post, Comment, Category, Tag } from '@prisma/client'
 
+// 用户资料类型
+export interface UserProfile {
+  username?: string
+  bio?: string
+  avatarUrl?: string
+  website?: string
+  github?: string
+  twitter?: string
+  location?: string
+  company?: string
+}
+
 // 扩展的用户类型
 export type UserWithProfile = User & {
   profile?: UserProfile
@@ -32,7 +44,7 @@ export type CommentWithDetails = Comment & {
 }
 
 // API 响应类型
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -87,16 +99,7 @@ export interface PostFormData {
   status: 'DRAFT' | 'PUBLISHED'
 }
 
-export interface UserProfileData {
-  username?: string
-  bio?: string
-  avatarUrl?: string
-  website?: string
-  github?: string
-  twitter?: string
-  location?: string
-  company?: string
-}
+// UserProfileData 已移动到文件顶部作为 UserProfile
 
 // 用户角色和权限
 export enum UserRole {
@@ -127,7 +130,7 @@ export interface Notification {
   content: string
   isRead: boolean
   createdAt: Date
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 }
 
 // 统计数据类型
