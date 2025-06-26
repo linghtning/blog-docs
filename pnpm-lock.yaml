@@ -141,9 +141,6 @@ importers:
       eslint-config-next:
         specifier: ^14.0.0
         version: 14.2.30(eslint@8.57.1)(typescript@5.8.3)
-      husky:
-        specifier: ^8.0.0
-        version: 8.0.3
       lint-staged:
         specifier: ^15.0.0
         version: 15.5.2
@@ -1626,11 +1623,6 @@ packages:
   human-signals@5.0.0:
     resolution: {integrity: sha512-AXcZb6vzzrFAUE61HnN4mpLqd/cSIwNQjtNWR0euPm6y0iqx3G4gOXaIDdtdDwZmhwe82LA6+zinmW4UBWVePQ==}
     engines: {node: '>=16.17.0'}
-
-  husky@8.0.3:
-    resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
-    engines: {node: '>=14'}
-    hasBin: true
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -4859,8 +4851,6 @@ snapshots:
       - supports-color
 
   human-signals@5.0.0: {}
-
-  husky@8.0.3: {}
 
   iconv-lite@0.6.3:
     dependencies:
