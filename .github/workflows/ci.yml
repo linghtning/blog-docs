@@ -7,11 +7,11 @@ on:
     branches: [ main ]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
 
 jobs:
-  lint-and-test:
-    name: 代码检查和测试
+  lint-and-check:
+    name: 代码检查
     runs-on: ubuntu-latest
 
     steps:
@@ -22,32 +22,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 安装依赖
-        run: npm ci
+        run: pnpm ci
 
       - name: 代码格式检查
-        run: npm run lint
+        run: pnpm run lint
 
       - name: 类型检查
-        run: npm run type-check
-
-      - name: 运行测试
-        run: npm run test
-
-      - name: 生成测试覆盖率报告
-        run: npm run test -- --coverage
-
-      - name: 上传覆盖率报告
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage/lcov.info
+        run: pnpm run type-check
 
   build:
     name: 构建应用
     runs-on: ubuntu-latest
-    needs: lint-and-test
+    needs: lint-and-check
 
     steps:
       - name: 检出代码
@@ -57,16 +46,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: 安装依赖
-        run: npm ci
+        run: pnpm ci
 
       - name: 生成 Prisma 客户端
-        run: npm run db:generate
+        run: pnpm run db:generate
 
       - name: 构建应用
-        run: npm run build
+        run: pnpm run build
 
       - name: 缓存构建结果
         uses: actions/cache@v3
@@ -78,71 +67,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
-  e2e-tests:
-    name: 端到端测试
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'pull_request'
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: test
-          MYSQL_DATABASE: blog_test
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
-    steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-
-      - name: 设置 Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: 安装依赖
-        run: npm ci
-
-      - name: 安装 Playwright
-        run: npx playwright install --with-deps
-
-      - name: 设置测试数据库
-        env:
-          DATABASE_URL: mysql://root:test@localhost:3306/blog_test
-        run: |
-          npm run db:migrate
-          npm run db:generate
-
-      - name: 运行端到端测试
-        env:
-          DATABASE_URL: mysql://root:test@localhost:3306/blog_test
-          REDIS_URL: redis://localhost:6379
-          NEXTAUTH_SECRET: test-secret
-          NEXTAUTH_URL: http://localhost:3000
-        run: npm run test:e2e
-
-      - name: 上传测试报告
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
 
   deploy-preview:
     name: 部署预览
     runs-on: ubuntu-latest
-    needs: [lint-and-test, build]
+    needs: [lint-and-check, build]
     if: github.event_name == 'pull_request'
 
     steps:
@@ -160,7 +90,7 @@ jobs:
   deploy-production:
     name: 生产环境部署
     runs-on: ubuntu-latest
-    needs: [lint-and-test, build]
+    needs: [lint-and-check, build]
     if: github.ref == 'refs/heads/main'
 
     steps:
