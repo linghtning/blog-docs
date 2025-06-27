@@ -19,6 +19,18 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.yourdomain.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'img2.baidu.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img1.baidu.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img0.baidu.com',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

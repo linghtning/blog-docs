@@ -77,9 +77,15 @@ export async function GET() {
       );
     }
 
+    // 转换 BigInt 为字符串以避免序列化问题
+    const serializedUser = {
+      ...user,
+      id: user.id.toString(),
+    };
+
     return NextResponse.json({
       success: true,
-      data: { user },
+      data: { user: serializedUser },
     });
   } catch (error) {
     console.error('获取用户资料失败:', error);
@@ -188,9 +194,15 @@ export async function PUT(request: NextRequest) {
       },
     });
 
+    // 转换 BigInt 为字符串以避免序列化问题
+    const serializedUpdatedUser = {
+      ...updatedUser,
+      id: updatedUser.id.toString(),
+    };
+
     return NextResponse.json({
       success: true,
-      data: { user: updatedUser },
+      data: { user: serializedUpdatedUser },
       message: '资料更新成功',
     });
   } catch (error) {

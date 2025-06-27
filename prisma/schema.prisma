@@ -53,8 +53,8 @@ model UserProfile {
   followersCount Int     @default(0) @map("followers_count")
   followingCount Int     @default(0) @map("following_count")
 
-  // 应用层关联，无数据库外键
-  user User? @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除用户时自动删除用户资料
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId])
   @@map("user_profiles")
@@ -101,9 +101,9 @@ model Post {
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
-  // 应用层关联，无数据库外键
-  author    User?     @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  category  Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除用户时删除其文章，删除分类时将文章分类设为null
+  author    User?     @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   comments  Comment[]
   favorites Favorite[]
   tags      PostTag[]
@@ -142,9 +142,9 @@ model PostTag {
   tagId     Int      @map("tag_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  // 应用层关联，无数据库外键
-  post Post? @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  tag  Tag?  @relation(fields: [tagId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除文章或标签时删除关联关系
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tag  Tag?  @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([postId, tagId])
   @@index([tagId])
@@ -167,10 +167,10 @@ model Comment {
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
 
-  // 应用层关联，无数据库外键
-  post    Post?     @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user    User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除文章时删除评论，删除用户时删除评论，删除父评论时删除子评论
+  post    Post?     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user    User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   replies Comment[] @relation("CommentReplies")
 
   @@index([postId])
@@ -189,8 +189,8 @@ model Like {
   targetId   BigInt     @map("target_id")
   createdAt  DateTime   @default(now()) @map("created_at")
 
-  // 应用层关联，无数据库外键
-  user User? @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除用户时删除其点赞记录
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, targetType, targetId])
   @@index([targetType, targetId])
@@ -205,9 +205,9 @@ model Favorite {
   postId    BigInt   @map("post_id")
   createdAt DateTime @default(now()) @map("created_at")
 
-  // 应用层关联，无数据库外键
-  user User? @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  post Post? @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除用户或文章时删除收藏记录
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, postId])
   @@index([userId])
@@ -224,9 +224,9 @@ model PostView {
   userAgent String?  @map("user_agent") @db.Text
   createdAt DateTime @default(now()) @map("created_at")
 
-  // 应用层关联，无数据库外键
-  post Post? @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user User? @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除文章时删除浏览记录，删除用户时设置用户ID为null
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([postId])
   @@index([userId])
@@ -244,8 +244,8 @@ model Notification {
   isRead     Boolean            @default(false) @map("is_read")
   createdAt  DateTime           @default(now()) @map("created_at")
 
-  // 应用层关联，无数据库外键
-  user User? @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  // 级联删除：删除用户时删除其通知
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId])
   @@index([isRead])
@@ -290,4 +290,4 @@ enum NotificationType {
   LIKE
   FOLLOW
   SYSTEM
-} 
+}

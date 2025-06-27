@@ -27,8 +27,8 @@ yarn.lock
 .pnpm-store/
 
 # 本地环境变量
-.env*.local
-.env
+# .env*.local
+# .env
 
 # Vercel
 .vercel
@@ -58,4 +58,4 @@ pids
 /test-results/
 /playwright-report/
 /blob-report/
-/playwright/.cache/ 
+/playwright/.cache/
