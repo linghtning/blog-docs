@@ -55,11 +55,14 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           const { email, password } = loginSchema.parse(credentials)
+          
 
           const user = await prisma.user.findUnique({
             where: { email },
             include: { profile: true },
           })
+
+          console.log('email :>> ', email);
 
           if (!user) {
             return null

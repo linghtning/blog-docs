@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+import { Navbar } from '@/components/layout/Navbar'
 
 export default function HomePage() {
   return (
-    <div className="container px-4 py-8 mx-auto max-w-6xl">
+    <>
+      <Navbar />
+      <div className="container px-4 py-8 mx-auto max-w-6xl">
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold text-gray-900">
           欢迎来到博客平台 测试
@@ -90,6 +93,7 @@ export default function HomePage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 } 
