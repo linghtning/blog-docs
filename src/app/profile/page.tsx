@@ -1,41 +1,42 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
 interface UserProfile {
-  id: string
-  username: string
-  email: string
-  avatarUrl?: string
-  bio?: string
-  role: string
-  createdAt: string
+  id: string;
+  username: string;
+  email: string;
+  avatarUrl?: string;
+  bio?: string;
+  role: string;
+  createdAt: string;
   profile?: {
-    website?: string
-    github?: string
-    twitter?: string
-    location?: string
-    company?: string
-    postsCount: number
-    followersCount: number
-    followingCount: number
-  }
+    website?: string;
+    github?: string;
+    twitter?: string;
+    location?: string;
+    company?: string;
+    postsCount: number;
+    followersCount: number;
+    followingCount: number;
+  };
 }
 
 export default function ProfilePage() {
-  const { status } = useSession()
-  const router = useRouter()
-  const [user, setUser] = useState<UserProfile | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
-  
+  const { status } = useSession();
+  const router = useRouter();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   const [formData, setFormData] = useState({
     username: '',
     bio: '',
@@ -44,27 +45,27 @@ export default function ProfilePage() {
     github: '',
     twitter: '',
     location: '',
-    company: ''
-  })
+    company: '',
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login')
-      return
+      router.push('/auth/login');
+      return;
     }
-    
+
     if (status === 'authenticated') {
-      fetchUserProfile()
+      fetchUserProfile();
     }
-  }, [status, router])
+  }, [status, router]);
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch('/api/users/profile')
-      const data = await response.json()
-      
+      const response = await fetch('/api/users/profile');
+      const data = await response.json();
+
       if (data.success) {
-        setUser(data.data.user)
+        setUser(data.data.user);
         setFormData({
           username: data.data.user.username || '',
           bio: data.data.user.bio || '',
@@ -73,70 +74,74 @@ export default function ProfilePage() {
           github: data.data.user.profile?.github || '',
           twitter: data.data.user.profile?.twitter || '',
           location: data.data.user.profile?.location || '',
-          company: data.data.user.profile?.company || ''
-        })
+          company: data.data.user.profile?.company || '',
+        });
       }
     } catch (error) {
-      console.error('获取用户资料失败:', error)
+      console.error('获取用户资料失败:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
+      [name]: value,
+    }));
     // 清除错误
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
-      }))
+        [name]: '',
+      }));
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
-    setErrors({})
+    e.preventDefault();
+    setIsSaving(true);
+    setErrors({});
 
     try {
       const response = await fetch('/api/users/profile', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
-      })
+        body: JSON.stringify(formData),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setUser(data.data.user)
-        setIsEditing(false)
+        setUser(data.data.user);
+        setIsEditing(false);
       } else {
         if (data.error?.code === 'USERNAME_EXISTS') {
-          setErrors({ username: '用户名已存在' })
+          setErrors({ username: '用户名已存在' });
         } else if (data.error?.code === 'VALIDATION_ERROR') {
-          const fieldErrors: { [key: string]: string } = {}
-          data.error.details?.forEach((error: any) => {
-            fieldErrors[error.path[0]] = error.message
-          })
-          setErrors(fieldErrors)
+          const fieldErrors: { [key: string]: string } = {};
+          data.error.details?.forEach(
+            (error: { path: string[]; message: string }) => {
+              fieldErrors[error.path[0]] = error.message;
+            }
+          );
+          setErrors(fieldErrors);
         } else {
-          setErrors({ submit: data.error?.message || '更新失败' })
+          setErrors({ submit: data.error?.message || '更新失败' });
         }
       }
     } catch (error) {
-      console.error('更新资料失败:', error)
-      setErrors({ submit: '网络错误，请稍后重试' })
+      console.error('更新资料失败:', error);
+      setErrors({ submit: '网络错误，请稍后重试' });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const handleCancel = () => {
     if (user) {
@@ -148,19 +153,19 @@ export default function ProfilePage() {
         github: user.profile?.github || '',
         twitter: user.profile?.twitter || '',
         location: user.profile?.location || '',
-        company: user.profile?.company || ''
-      })
+        company: user.profile?.company || '',
+      });
     }
-    setIsEditing(false)
-    setErrors({})
-  }
+    setIsEditing(false);
+    setErrors({});
+  };
 
   if (status === 'loading' || isLoading) {
     return (
       <div className="container px-4 py-8 mx-auto max-w-4xl">
         <div className="text-center">加载中...</div>
       </div>
-    )
+    );
   }
 
   if (!user) {
@@ -168,7 +173,7 @@ export default function ProfilePage() {
       <div className="container px-4 py-8 mx-auto max-w-4xl">
         <div className="text-center">用户不存在</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -180,10 +185,12 @@ export default function ProfilePage() {
             <CardContent className="p-6 text-center">
               <div className="mb-4">
                 {user.avatarUrl ? (
-                  <img
+                  <Image
                     src={user.avatarUrl}
                     alt={user.username}
-                    className="mx-auto w-20 h-20 rounded-full"
+                    width={80}
+                    height={80}
+                    className="mx-auto rounded-full"
                   />
                 ) : (
                   <div className="flex justify-center items-center mx-auto w-20 h-20 bg-gray-300 rounded-full">
@@ -198,18 +205,24 @@ export default function ProfilePage() {
               {user.bio && (
                 <p className="mt-2 text-sm text-gray-700">{user.bio}</p>
               )}
-              
+
               <div className="grid grid-cols-3 gap-4 mt-4 text-center">
                 <div>
-                  <div className="font-bold">{user.profile?.postsCount || 0}</div>
+                  <div className="font-bold">
+                    {user.profile?.postsCount || 0}
+                  </div>
                   <div className="text-sm text-gray-600">文章</div>
                 </div>
                 <div>
-                  <div className="font-bold">{user.profile?.followersCount || 0}</div>
+                  <div className="font-bold">
+                    {user.profile?.followersCount || 0}
+                  </div>
                   <div className="text-sm text-gray-600">关注者</div>
                 </div>
                 <div>
-                  <div className="font-bold">{user.profile?.followingCount || 0}</div>
+                  <div className="font-bold">
+                    {user.profile?.followingCount || 0}
+                  </div>
                   <div className="text-sm text-gray-600">关注中</div>
                 </div>
               </div>
@@ -224,9 +237,7 @@ export default function ProfilePage() {
               <div className="flex justify-between items-center">
                 <CardTitle>个人资料</CardTitle>
                 {!isEditing && (
-                  <Button onClick={() => setIsEditing(true)}>
-                    编辑资料
-                  </Button>
+                  <Button onClick={() => setIsEditing(true)}>编辑资料</Button>
                 )}
               </div>
             </CardHeader>
@@ -314,18 +325,16 @@ export default function ProfilePage() {
                   />
 
                   {errors.submit && (
-                    <div className="text-sm text-red-600">
-                      {errors.submit}
-                    </div>
+                    <div className="text-sm text-red-600">{errors.submit}</div>
                   )}
 
                   <div className="flex space-x-2">
                     <Button type="submit" disabled={isSaving}>
                       {isSaving ? '保存中...' : '保存'}
                     </Button>
-                    <Button 
-                      type="button" 
-                      variant="secondary" 
+                    <Button
+                      type="button"
+                      variant="secondary"
                       onClick={handleCancel}
                     >
                       取消
@@ -336,28 +345,46 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <label className="text-sm font-medium text-gray-500">用户名</label>
+                      <label className="text-sm font-medium text-gray-500">
+                        用户名
+                      </label>
                       <p className="mt-1">{user.username}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">邮箱</label>
+                      <label className="text-sm font-medium text-gray-500">
+                        邮箱
+                      </label>
                       <p className="mt-1">{user.email}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">角色</label>
-                      <p className="mt-1">{user.role === 'ADMIN' ? '管理员' : user.role === 'AUTHOR' ? '作者' : '用户'}</p>
+                      <label className="text-sm font-medium text-gray-500">
+                        角色
+                      </label>
+                      <p className="mt-1">
+                        {user.role === 'ADMIN'
+                          ? '管理员'
+                          : user.role === 'AUTHOR'
+                            ? '作者'
+                            : '用户'}
+                      </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">注册时间</label>
-                      <p className="mt-1">{new Date(user.createdAt).toLocaleDateString()}</p>
+                      <label className="text-sm font-medium text-gray-500">
+                        注册时间
+                      </label>
+                      <p className="mt-1">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                     {user.profile?.website && (
                       <div>
-                        <label className="text-sm font-medium text-gray-500">网站</label>
+                        <label className="text-sm font-medium text-gray-500">
+                          网站
+                        </label>
                         <p className="mt-1">
-                          <a 
-                            href={user.profile.website} 
-                            target="_blank" 
+                          <a
+                            href={user.profile.website}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
                           >
@@ -368,21 +395,27 @@ export default function ProfilePage() {
                     )}
                     {user.profile?.location && (
                       <div>
-                        <label className="text-sm font-medium text-gray-500">所在地</label>
+                        <label className="text-sm font-medium text-gray-500">
+                          所在地
+                        </label>
                         <p className="mt-1">{user.profile.location}</p>
                       </div>
                     )}
                     {user.profile?.company && (
                       <div>
-                        <label className="text-sm font-medium text-gray-500">公司</label>
+                        <label className="text-sm font-medium text-gray-500">
+                          公司
+                        </label>
                         <p className="mt-1">{user.profile.company}</p>
                       </div>
                     )}
                   </div>
-                  
+
                   {user.bio && (
                     <div>
-                      <label className="text-sm font-medium text-gray-500">个人简介</label>
+                      <label className="text-sm font-medium text-gray-500">
+                        个人简介
+                      </label>
                       <p className="mt-1">{user.bio}</p>
                     </div>
                   )}
@@ -393,5 +426,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

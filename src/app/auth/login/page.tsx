@@ -1,84 +1,85 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
-  })
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+    password: '',
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
+      [name]: value,
+    }));
     // 清除该字段的错误
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
-      }))
+        [name]: '',
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors: { [key: string]: string } = {}
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData.email) {
-      newErrors.email = '邮箱不能为空'
+      newErrors.email = '邮箱不能为空';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = '邮箱格式不正确'
+      newErrors.email = '邮箱格式不正确';
     }
 
     if (!formData.password) {
-      newErrors.password = '密码不能为空'
+      newErrors.password = '密码不能为空';
     } else if (formData.password.length < 6) {
-      newErrors.password = '密码至少6个字符'
+      newErrors.password = '密码至少6个字符';
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
+    e.preventDefault();
 
-    setIsLoading(true)
+    if (!validateForm()) return;
+
+    setIsLoading(true);
 
     try {
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: false
-      })
+        redirect: false,
+      });
+      console.log('result :>> ', result);
 
       if (result?.error) {
-        setErrors({ submit: '邮箱或密码错误' })
+        setErrors({ submit: '邮箱或密码错误' });
       } else {
         // 登录成功，重定向到首页
-        router.push('/')
-        router.refresh()
+        router.push('/');
+        router.refresh();
       }
     } catch (error) {
-      console.error('登录失败:', error)
-      setErrors({ submit: '登录失败，请稍后重试' })
+      console.error('登录失败:', error);
+      setErrors({ submit: '登录失败，请稍后重试' });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container px-4 py-16 mx-auto max-w-md">
@@ -116,23 +117,22 @@ export default function LoginPage() {
               </div>
             )}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? '登录中...' : '登录'}
             </Button>
           </form>
 
           <div className="mt-6 text-sm text-center text-gray-600">
             还没有账户？
-            <Link href="/auth/register" className="ml-1 text-blue-600 hover:text-blue-800">
+            <Link
+              href="/auth/register"
+              className="ml-1 text-blue-600 hover:text-blue-800"
+            >
               立即注册
             </Link>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}

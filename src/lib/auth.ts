@@ -1,44 +1,45 @@
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from './db'
-import bcrypt from 'bcryptjs'
-import { z } from 'zod'
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { prisma } from './db';
+import bcrypt from 'bcryptjs';
+import { z } from 'zod';
+import type { Adapter } from 'next-auth/adapters';
 
 // 扩展 NextAuth 类型
 declare module 'next-auth' {
   interface Session {
     user: {
-      id: string
-      email: string
-      username: string
-      role: string
-    }
+      id: string;
+      email: string;
+      username: string;
+      role: string;
+    };
   }
 
   interface User {
-    id: string
-    email: string
-    username: string
-    role: string
-    avatar?: string
+    id: string;
+    email: string;
+    username: string;
+    role: string;
+    avatar?: string;
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role?: string
-    username?: string
+    role?: string;
+    username?: string;
   }
 }
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-})
+});
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: 'jwt',
   },
@@ -54,24 +55,26 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const { email, password } = loginSchema.parse(credentials)
-          
+          const { email, password } = loginSchema.parse(credentials);
 
           const user = await prisma.user.findUnique({
             where: { email },
             include: { profile: true },
-          })
+          });
 
           console.log('email :>> ', email);
 
           if (!user) {
-            return null
+            return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(password, user.passwordHash)
+          const isPasswordValid = await bcrypt.compare(
+            password,
+            user.passwordHash
+          );
 
           if (!isPasswordValid) {
-            return null
+            return null;
           }
 
           return {
@@ -80,9 +83,9 @@ export const authOptions: NextAuthOptions = {
             username: user.username,
             avatar: user.avatarUrl || undefined,
             role: user.role,
-          }
+          };
         } catch {
-          return null
+          return null;
         }
       },
     }),
@@ -90,18 +93,18 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
-        token.username = user.username
+        token.role = user.role;
+        token.username = user.username;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.sub!
-        session.user.role = token.role as string
-        session.user.username = token.username as string
+        session.user.id = token.sub!;
+        session.user.role = token.role as string;
+        session.user.username = token.username as string;
       }
-      return session
+      return session;
     },
   },
-} 
+};

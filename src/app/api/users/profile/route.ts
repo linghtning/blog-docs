@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { z } from 'zod'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 const updateProfileSchema = z.object({
-  username: z.string()
+  username: z
+    .string()
     .min(3, '用户名至少3个字符')
     .max(20, '用户名最多20个字符')
     .regex(/^[a-zA-Z0-9_]+$/, '用户名只能包含字母、数字和下划线')
@@ -17,24 +18,24 @@ const updateProfileSchema = z.object({
   twitter: z.string().max(100).optional(),
   location: z.string().max(100).optional(),
   company: z.string().max(100).optional(),
-})
+});
 
 // 获取用户资料
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
+        {
+          success: false,
+          error: {
             code: 'UNAUTHORIZED',
-            message: '未登录' 
-          } 
+            message: '未登录',
+          },
         },
         { status: 401 }
-      )
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -58,96 +59,99 @@ export async function GET() {
             postsCount: true,
             followersCount: true,
             followingCount: true,
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    });
 
     if (!user) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
+        {
+          success: false,
+          error: {
             code: 'USER_NOT_FOUND',
-            message: '用户不存在' 
-          } 
+            message: '用户不存在',
+          },
         },
         { status: 404 }
-      )
+      );
     }
 
     return NextResponse.json({
       success: true,
-      data: { user }
-    })
-
+      data: { user },
+    });
   } catch (error) {
-    console.error('获取用户资料失败:', error)
+    console.error('获取用户资料失败:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: '服务器内部错误'
-        }
+          message: '服务器内部错误',
+        },
       },
       { status: 500 }
-    )
+    );
   }
 }
 
 // 更新用户资料
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
+    const session = await getServerSession(authOptions);
+
     if (!session?.user?.id) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
+        {
+          success: false,
+          error: {
             code: 'UNAUTHORIZED',
-            message: '未登录' 
-          } 
+            message: '未登录',
+          },
         },
         { status: 401 }
-      )
+      );
     }
 
-    const body = await request.json()
-    const validatedData = updateProfileSchema.parse(body)
+    const body = await request.json();
+    const validatedData = updateProfileSchema.parse(body);
 
     // 如果更新用户名，检查是否已存在
     if (validatedData.username) {
       const existingUser = await prisma.user.findFirst({
         where: {
           username: validatedData.username,
-          id: { not: BigInt(session.user.id) }
-        }
-      })
+          id: { not: BigInt(session.user.id) },
+        },
+      });
 
       if (existingUser) {
         return NextResponse.json(
-          { 
-            success: false, 
-            error: { 
+          {
+            success: false,
+            error: {
               code: 'USERNAME_EXISTS',
-              message: '用户名已存在' 
-            } 
+              message: '用户名已存在',
+            },
           },
           { status: 400 }
-        )
+        );
       }
     }
 
     // 分离用户表和资料表的数据
-    const { username, bio, avatarUrl, ...profileData } = validatedData
+    const { username, bio, avatarUrl, ...profileData } = validatedData;
 
     // 更新用户基本信息
-    const userUpdateData: any = {}
-    if (username !== undefined) userUpdateData.username = username
-    if (bio !== undefined) userUpdateData.bio = bio
-    if (avatarUrl !== undefined) userUpdateData.avatarUrl = avatarUrl
+    const userUpdateData: {
+      username?: string;
+      bio?: string;
+      avatarUrl?: string;
+    } = {};
+    if (username !== undefined) userUpdateData.username = username;
+    if (bio !== undefined) userUpdateData.bio = bio;
+    if (avatarUrl !== undefined) userUpdateData.avatarUrl = avatarUrl;
 
     // 更新用户信息
     const updatedUser = await prisma.user.update({
@@ -157,9 +161,9 @@ export async function PUT(request: NextRequest) {
         profile: {
           upsert: {
             create: profileData,
-            update: profileData
-          }
-        }
+            update: profileData,
+          },
+        },
       },
       select: {
         id: true,
@@ -179,20 +183,19 @@ export async function PUT(request: NextRequest) {
             postsCount: true,
             followersCount: true,
             followingCount: true,
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    });
 
     return NextResponse.json({
       success: true,
       data: { user: updatedUser },
-      message: '资料更新成功'
-    })
-
+      message: '资料更新成功',
+    });
   } catch (error) {
-    console.error('更新用户资料失败:', error)
-    
+    console.error('更新用户资料失败:', error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -200,11 +203,11 @@ export async function PUT(request: NextRequest) {
           error: {
             code: 'VALIDATION_ERROR',
             message: '数据验证失败',
-            details: error.errors
-          }
+            details: error.errors,
+          },
         },
         { status: 400 }
-      )
+      );
     }
 
     return NextResponse.json(
@@ -212,10 +215,10 @@ export async function PUT(request: NextRequest) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: '服务器内部错误'
-        }
+          message: '服务器内部错误',
+        },
       },
       { status: 500 }
-    )
+    );
   }
-} 
+}
