@@ -1,14 +1,21 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { SessionProvider } from '@/components/providers/SessionProvider'
-import './globals.css'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { SessionProvider } from '@/components/providers/SessionProvider';
+import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap', // 使用 font-display: swap 避免布局偏移
+  preload: true, // 确保字体被正确预加载
+  variable: '--font-inter', // 添加 CSS 变量以便更好的控制
+  fallback: ['system-ui', 'arial'], // 添加备用字体
+  adjustFontFallback: false, // 禁用字体回退调整以减少警告
+});
 
 export const metadata: Metadata = {
   title: {
     default: '博客平台',
-    template: '%s | 博客平台'
+    template: '%s | 博客平台',
   },
   description: '现代化的博客发布平台，为内容创作者提供优秀的写作发布体验',
   keywords: ['博客', '写作', '内容创作', 'Next.js', 'TypeScript'],
@@ -39,22 +46,20 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" className={inter.variable}>
       <body className={inter.className}>
         <SessionProvider>
-          <div className="min-h-screen bg-gray-50">
-            {children}
-          </div>
+          <div className="min-h-screen bg-gray-50">{children}</div>
         </SessionProvider>
       </body>
     </html>
-  )
-} 
+  );
+}

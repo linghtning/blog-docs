@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // 服务端外部包配置 - Next.js 15 新语法
   serverExternalPackages: ['prisma'],
 
+  // 字体优化配置 - 解决字体预加载警告
+  optimizeFonts: true,
+
   // 图片优化配置 - Next.js 15 更新
   images: {
     remotePatterns: [
