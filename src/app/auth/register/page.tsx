@@ -1,3 +1,37 @@
+/**
+ * 用户注册页面 - 新用户账户创建表单
+ *
+ * 主要功能：
+ * 1. 新用户注册表单处理
+ * 2. 服务器操作集成（Server Actions）
+ * 3. 实时表单验证和错误显示
+ * 4. 注册成功后重定向到登录页
+ * 5. 登录页面链接引导
+ *
+ * 表单字段：
+ * - 用户名（3-20字符，字母数字下划线）
+ * - 邮箱地址（有效邮箱格式）
+ * - 密码（至少6字符，包含字母数字）
+ * - 确认密码（密码一致性验证）
+ *
+ * 错误处理：
+ * - 服务器端验证错误显示
+ * - 用户名/邮箱重复检查
+ * - 详细的验证错误列表
+ * - 网络错误处理
+ *
+ * 特性：
+ * - React 19 useTransition
+ * - Server Actions 集成
+ * - 无 JavaScript 降级支持
+ * - 实时状态更新
+ *
+ * 使用技术：
+ * - Next.js 15 Server Actions
+ * - React 19 Transitions
+ * - TypeScript 类型定义
+ * - 表单原生提交
+ */
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -47,10 +81,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container px-4 py-16 mx-auto max-w-md">
+    <div className="container mx-auto max-w-md px-4 py-16">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl text-center">注册账户</CardTitle>
+          <CardTitle className="text-center text-2xl">注册账户</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={handleSubmit} className="space-y-4">
@@ -98,7 +132,7 @@ export default function RegisterPage() {
 
             {state?.error && state.error.code === 'VALIDATION_ERROR' && (
               <div className="text-sm text-red-600">
-                <ul className="list-disc list-inside">
+                <ul className="list-inside list-disc">
                   {state.error.details?.map((error, index) => (
                     <li key={index}>{error.message}</li>
                   ))}
@@ -107,7 +141,7 @@ export default function RegisterPage() {
             )}
 
             {state?.error && ['INTERNAL_ERROR'].includes(state.error.code) && (
-              <div className="text-sm text-center text-red-600">
+              <div className="text-center text-sm text-red-600">
                 {state.error.message}
               </div>
             )}
@@ -122,7 +156,7 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-sm text-center text-gray-600">
+          <div className="mt-6 text-center text-sm text-gray-600">
             已有账户？
             <Link
               href="/auth/login"

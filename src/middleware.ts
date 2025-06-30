@@ -1,3 +1,22 @@
+/**
+ * Next.js 中间件 - 路由保护和认证检查
+ *
+ * 主要功能：
+ * 1. 检查用户身份认证状态
+ * 2. 保护需要登录的路由
+ * 3. 实现基于角色的访问控制（RBAC）
+ * 4. 处理未认证用户的重定向
+ *
+ * 路由保护策略：
+ * - 公开路由：首页、文章列表、搜索、登录、注册
+ * - 作者路由：写作控制台、文章编辑（需要 AUTHOR 或 ADMIN 角色）
+ * - 管理员路由：后台管理（需要 ADMIN 角色）
+ *
+ * 使用技术：
+ * - NextAuth.js JWT 认证
+ * - Next.js 15 中间件 API
+ * - 路径匹配配置
+ */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';

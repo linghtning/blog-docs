@@ -1,3 +1,37 @@
+/**
+ * 用户登录页面 - 用户身份验证和登录表单
+ *
+ * 主要功能：
+ * 1. 用户邮箱密码登录表单
+ * 2. 客户端表单验证
+ * 3. 登录状态管理和错误处理
+ * 4. 登录成功后的页面重定向
+ * 5. 注册页面链接引导
+ *
+ * 表单验证：
+ * - 邮箱格式验证
+ * - 密码长度验证
+ * - 实时错误提示
+ * - 防止重复提交
+ *
+ * 用户体验：
+ * - 加载状态指示
+ * - 错误信息显示
+ * - 响应式布局
+ * - 无障碍访问
+ *
+ * 安全特性：
+ * - NextAuth.js 认证
+ * - CSRF 保护
+ * - 客户端验证
+ * - 安全重定向
+ *
+ * 使用技术：
+ * - Next.js 客户端组件
+ * - NextAuth.js signIn
+ * - React Hooks 状态管理
+ * - TypeScript 类型安全
+ */
 'use client';
 
 import { useState } from 'react';
@@ -82,10 +116,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container px-4 py-16 mx-auto max-w-md">
+    <div className="container mx-auto max-w-md px-4 py-16">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl text-center">登录账户</CardTitle>
+          <CardTitle className="text-center text-2xl">登录账户</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,7 +146,7 @@ export default function LoginPage() {
             />
 
             {errors.submit && (
-              <div className="text-sm text-center text-red-600">
+              <div className="text-center text-sm text-red-600">
                 {errors.submit}
               </div>
             )}
@@ -122,7 +156,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-sm text-center text-gray-600">
+          <div className="mt-6 text-center text-sm text-gray-600">
             还没有账户？
             <Link
               href="/auth/register"

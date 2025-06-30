@@ -1,34 +1,84 @@
-'use client'
+/**
+ * UI组件测试页面 - 所有自定义组件的展示和测试页面
+ *
+ * 主要功能：
+ * 1. 展示所有UI组件的不同变体和状态
+ * 2. 提供交互式测试环境
+ * 3. 验证组件功能和样式正确性
+ * 4. 开发过程中的组件调试工具
+ * 5. 设计系统的可视化展示
+ *
+ * 测试内容：
+ * - Button组件：变体、尺寸、状态测试
+ * - Input组件：类型、验证、状态测试
+ * - Card组件：布局、内容展示测试
+ * - 交互逻辑：点击、输入、状态变化
+ *
+ * 组件测试分类：
+ * - 视觉测试：样式、颜色、尺寸
+ * - 功能测试：交互、状态、事件
+ * - 响应式测试：不同屏幕尺寸适配
+ * - 无障碍测试：键盘导航、屏幕阅读器
+ *
+ * 开发用途：
+ * - 组件开发调试
+ * - 设计系统验证
+ * - UI一致性检查
+ * - 回归测试参考
+ *
+ * 特性：
+ * - 实时交互演示
+ * - 状态管理测试
+ * - 错误场景模拟
+ * - 加载状态演示
+ *
+ * 使用技术：
+ * - React 客户端组件
+ * - React Hooks 状态管理
+ * - 自定义UI组件库
+ * - TypeScript 类型安全
+ * - Tailwind CSS 样式
+ */
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/Button'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card'
-import { Input } from '@/components/ui/Input'
+import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 
 export default function ComponentsTestPage() {
-  const [inputValue, setInputValue] = useState('')
-  const [inputError, setInputError] = useState('')
-  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
+  const [inputValue, setInputValue] = useState('');
+  const [inputError, setInputError] = useState('');
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const handleButtonClick = (buttonName: string) => {
-    setLoadingStates(prev => ({ ...prev, [buttonName]: true }))
+    setLoadingStates((prev) => ({ ...prev, [buttonName]: true }));
     setTimeout(() => {
-      setLoadingStates(prev => ({ ...prev, [buttonName]: false }))
-      alert(`${buttonName} 按钮被点击！`)
-    }, 2000)
-  }
+      setLoadingStates((prev) => ({ ...prev, [buttonName]: false }));
+      alert(`${buttonName} 按钮被点击！`);
+    }, 2000);
+  };
 
   const handleInputValidation = (value: string) => {
-    setInputValue(value)
+    setInputValue(value);
     if (value.length < 3 && value.length > 0) {
-      setInputError('至少输入3个字符')
+      setInputError('至少输入3个字符');
     } else {
-      setInputError('')
+      setInputError('');
     }
-  }
+  };
 
   return (
-    <div className="container px-4 py-8 mx-auto max-w-7xl">
+    <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold text-gray-900">
           🧪 UI组件测试页面
@@ -40,8 +90,10 @@ export default function ComponentsTestPage() {
 
       {/* Button 组件测试 */}
       <section className="mb-12">
-        <h2 className="mb-6 text-2xl font-semibold text-gray-900">Button 组件测试</h2>
-        
+        <h2 className="mb-6 text-2xl font-semibold text-gray-900">
+          Button 组件测试
+        </h2>
+
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>按钮变体 (Variants)</CardTitle>
@@ -49,36 +101,36 @@ export default function ComponentsTestPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 onClick={() => handleButtonClick('Primary')}
                 loading={loadingStates['primary']}
               >
                 Primary 按钮
               </Button>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 onClick={() => handleButtonClick('Secondary')}
                 loading={loadingStates['secondary']}
               >
                 Secondary 按钮
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => handleButtonClick('Outline')}
                 loading={loadingStates['outline']}
               >
                 Outline 按钮
               </Button>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => handleButtonClick('Ghost')}
                 loading={loadingStates['ghost']}
               >
                 Ghost 按钮
               </Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={() => handleButtonClick('Destructive')}
                 loading={loadingStates['destructive']}
               >
@@ -94,7 +146,7 @@ export default function ComponentsTestPage() {
             <CardDescription>测试不同大小的按钮</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex flex-wrap items-center gap-4">
               <Button size="sm" onClick={() => alert('小按钮被点击')}>
                 小按钮 (sm)
               </Button>
@@ -115,15 +167,9 @@ export default function ComponentsTestPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              <Button onClick={() => alert('正常按钮被点击')}>
-                正常状态
-              </Button>
-              <Button disabled>
-                禁用状态
-              </Button>
-              <Button loading>
-                加载状态
-              </Button>
+              <Button onClick={() => alert('正常按钮被点击')}>正常状态</Button>
+              <Button disabled>禁用状态</Button>
+              <Button loading>加载状态</Button>
             </div>
           </CardContent>
         </Card>
@@ -131,8 +177,10 @@ export default function ComponentsTestPage() {
 
       {/* Input 组件测试 */}
       <section className="mb-12">
-        <h2 className="mb-6 text-2xl font-semibold text-gray-900">Input 组件测试</h2>
-        
+        <h2 className="mb-6 text-2xl font-semibold text-gray-900">
+          Input 组件测试
+        </h2>
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
@@ -145,14 +193,14 @@ export default function ComponentsTestPage() {
                 placeholder="请输入用户名"
                 helperText="用户名将用于登录"
               />
-              
+
               <Input
                 label="密码"
                 type="password"
                 placeholder="请输入密码"
                 helperText="密码至少8位"
               />
-              
+
               <Input
                 label="邮箱"
                 type="email"
@@ -161,7 +209,7 @@ export default function ComponentsTestPage() {
                 onChange={(e) => handleInputValidation(e.target.value)}
                 error={inputError}
               />
-              
+
               <Input
                 label="禁用输入框"
                 placeholder="这是一个禁用的输入框"
@@ -183,19 +231,15 @@ export default function ComponentsTestPage() {
                 placeholder="请输入数字"
                 helperText="只能输入数字"
               />
-              
-              <Input
-                label="日期选择"
-                type="date"
-                helperText="选择一个日期"
-              />
-              
+
+              <Input label="日期选择" type="date" helperText="选择一个日期" />
+
               <Input
                 label="文件上传"
                 type="file"
                 helperText="选择要上传的文件"
               />
-              
+
               <Input
                 label="搜索框"
                 type="search"
@@ -209,8 +253,10 @@ export default function ComponentsTestPage() {
 
       {/* Card 组件测试 */}
       <section className="mb-12">
-        <h2 className="mb-6 text-2xl font-semibold text-gray-900">Card 组件测试</h2>
-        
+        <h2 className="mb-6 text-2xl font-semibold text-gray-900">
+          Card 组件测试
+        </h2>
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card variant="default">
             <CardHeader>
@@ -238,7 +284,9 @@ export default function ComponentsTestPage() {
               </p>
             </CardContent>
             <CardFooter>
-              <Button size="sm" variant="secondary">操作</Button>
+              <Button size="sm" variant="secondary">
+                操作
+              </Button>
             </CardFooter>
           </Card>
 
@@ -253,12 +301,14 @@ export default function ComponentsTestPage() {
               </p>
             </CardContent>
             <CardFooter>
-              <Button size="sm" variant="outline">操作</Button>
+              <Button size="sm" variant="outline">
+                操作
+              </Button>
             </CardFooter>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
           <Card padding="sm">
             <CardHeader>
               <CardTitle>小间距卡片</CardTitle>
@@ -275,7 +325,9 @@ export default function ComponentsTestPage() {
               <CardDescription>padding=&quot;lg&quot;</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">这个卡片使用较大的内边距，给内容更多呼吸空间。</p>
+              <p className="text-gray-600">
+                这个卡片使用较大的内边距，给内容更多呼吸空间。
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -283,8 +335,10 @@ export default function ComponentsTestPage() {
 
       {/* 组合示例 */}
       <section className="mb-12">
-        <h2 className="mb-6 text-2xl font-semibold text-gray-900">组件组合示例</h2>
-        
+        <h2 className="mb-6 text-2xl font-semibold text-gray-900">
+          组件组合示例
+        </h2>
+
         <Card variant="elevated" className="mx-auto max-w-md">
           <CardHeader>
             <CardTitle>用户登录</CardTitle>
@@ -308,7 +362,7 @@ export default function ComponentsTestPage() {
             <Button variant="ghost" size="sm">
               忘记密码？
             </Button>
-            <Button 
+            <Button
               onClick={() => handleButtonClick('Login')}
               loading={loadingStates['login']}
             >
@@ -320,7 +374,7 @@ export default function ComponentsTestPage() {
 
       {/* 测试结果汇总 */}
       <section>
-        <Card variant="outlined" className="bg-green-50 border-green-200">
+        <Card variant="outlined" className="border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="text-green-800">✅ 组件测试汇总</CardTitle>
             <CardDescription className="text-green-700">
@@ -330,7 +384,9 @@ export default function ComponentsTestPage() {
           <CardContent>
             <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
               <div>
-                <h4 className="mb-2 font-semibold text-green-800">Button 组件</h4>
+                <h4 className="mb-2 font-semibold text-green-800">
+                  Button 组件
+                </h4>
                 <ul className="space-y-1 text-green-700">
                   <li>✓ 5种变体样式</li>
                   <li>✓ 3种尺寸规格</li>
@@ -340,7 +396,9 @@ export default function ComponentsTestPage() {
                 </ul>
               </div>
               <div>
-                <h4 className="mb-2 font-semibold text-green-800">Input 组件</h4>
+                <h4 className="mb-2 font-semibold text-green-800">
+                  Input 组件
+                </h4>
                 <ul className="space-y-1 text-green-700">
                   <li>✓ 多种输入类型</li>
                   <li>✓ 标签和提示文本</li>
@@ -369,5 +427,5 @@ export default function ComponentsTestPage() {
         </Card>
       </section>
     </div>
-  )
-} 
+  );
+}

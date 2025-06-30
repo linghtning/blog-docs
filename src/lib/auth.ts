@@ -1,3 +1,32 @@
+/**
+ * NextAuth.js 认证配置 - 用户身份验证和会话管理
+ *
+ * 主要功能：
+ * 1. 配置认证提供者（邮箱密码登录）
+ * 2. 处理用户登录验证逻辑
+ * 3. 管理 JWT 令牌和会话
+ * 4. 扩展 NextAuth 类型定义
+ * 5. 集成 Prisma 数据库适配器
+ *
+ * 认证流程：
+ * - 用户输入邮箱和密码
+ * - 验证输入数据格式
+ * - 查询数据库中的用户信息
+ * - 比较密码哈希值
+ * - 生成 JWT 令牌和会话
+ *
+ * 安全特性：
+ * - bcryptjs 密码哈希
+ * - Zod 数据验证
+ * - JWT 会话策略
+ * - 角色权限控制
+ *
+ * 使用技术：
+ * - NextAuth.js v4
+ * - Prisma ORM
+ * - bcryptjs 加密
+ * - Zod 验证库
+ */
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';

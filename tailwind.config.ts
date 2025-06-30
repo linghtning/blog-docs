@@ -1,3 +1,48 @@
+/**
+ * Tailwind CSS 配置文件 - 项目样式系统配置
+ *
+ * 主要配置：
+ * 1. 扫描路径设置（组件、页面、应用）
+ * 2. 自定义主题配置（颜色、字体、排版）
+ * 3. Typography插件配置
+ * 4. 暗色模式支持
+ * 5. 设计系统标准化
+ *
+ * 颜色系统：
+ * - Primary主色调：蓝色系（50-900）
+ * - Gray灰度色：完整色阶
+ * - 语义化颜色命名
+ * - 无障碍访问对比度
+ *
+ * 字体配置：
+ * - Inter字体作为主字体
+ * - Fira Code等宽字体
+ * - CSS变量集成
+ * - 字体回退策略
+ *
+ * Typography插件：
+ * - Markdown内容样式
+ * - 代码高亮配置
+ * - 引用块样式
+ * - 暗色模式适配
+ *
+ * 响应式设计：
+ * - 移动端优先
+ * - 断点标准化
+ * - 组件响应式
+ *
+ * 特性：
+ * - CSS-in-JS支持
+ * - 组件样式隔离
+ * - 性能优化
+ * - 开发体验优化
+ *
+ * 使用技术：
+ * - Tailwind CSS v3
+ * - Typography插件
+ * - TypeScript配置
+ * - 设计令牌系统
+ */
 import type { Config } from 'tailwindcss';
 import typography from '@tailwindcss/typography';
 

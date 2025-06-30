@@ -1,3 +1,44 @@
+/**
+ * 用户资料页面 - 用户个人信息展示和编辑
+ *
+ * 主要功能：
+ * 1. 展示用户基本信息和统计数据
+ * 2. 支持用户资料编辑和更新
+ * 3. 头像显示和社交链接展示
+ * 4. 实时表单验证和错误处理
+ * 5. 响应式布局和用户体验
+ *
+ * 页面结构：
+ * - 左侧：用户头像、基本信息、统计数据
+ * - 右侧：详细资料编辑表单
+ * - 编辑模式：可编辑的表单控件
+ * - 查看模式：只读信息展示
+ *
+ * 数据管理：
+ * - 从API获取用户资料
+ * - 本地状态管理表单数据
+ * - 实时同步服务器更新
+ * - 错误状态处理和显示
+ *
+ * 安全特性：
+ * - 登录状态验证
+ * - 权限检查和重定向
+ * - 用户名唯一性验证
+ * - 数据验证和清理
+ *
+ * 用户体验：
+ * - 加载状态指示
+ * - 编辑取消确认
+ * - 错误信息提示
+ * - 响应式设计
+ *
+ * 使用技术：
+ * - Next.js 客户端组件
+ * - NextAuth.js 会话管理
+ * - React Hooks 状态管理
+ * - Fetch API 数据请求
+ * - TypeScript 类型安全
+ */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -162,7 +203,7 @@ export default function ProfilePage() {
 
   if (status === 'loading' || isLoading) {
     return (
-      <div className="container px-4 py-8 mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="text-center">加载中...</div>
       </div>
     );
@@ -170,14 +211,14 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="container px-4 py-8 mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
         <div className="text-center">用户不存在</div>
       </div>
     );
   }
 
   return (
-    <div className="container px-4 py-8 mx-auto max-w-4xl">
+    <div className="container mx-auto max-w-4xl px-4 py-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* 用户信息卡片 */}
         <div className="lg:col-span-1">
@@ -193,7 +234,7 @@ export default function ProfilePage() {
                     className="mx-auto rounded-full"
                   />
                 ) : (
-                  <div className="flex justify-center items-center mx-auto w-20 h-20 bg-gray-300 rounded-full">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gray-300">
                     <span className="text-xl font-bold text-gray-600">
                       {user.username.charAt(0).toUpperCase()}
                     </span>
@@ -206,7 +247,7 @@ export default function ProfilePage() {
                 <p className="mt-2 text-sm text-gray-700">{user.bio}</p>
               )}
 
-              <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+              <div className="mt-4 grid grid-cols-3 gap-4 text-center">
                 <div>
                   <div className="font-bold">
                     {user.profile?.postsCount || 0}
@@ -234,7 +275,7 @@ export default function ProfilePage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <CardTitle>个人资料</CardTitle>
                 {!isEditing && (
                   <Button onClick={() => setIsEditing(true)}>编辑资料</Button>
@@ -254,7 +295,7 @@ export default function ProfilePage() {
                   />
 
                   <div>
-                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
                       个人简介
                     </label>
                     <textarea
@@ -263,7 +304,7 @@ export default function ProfilePage() {
                       onChange={handleChange}
                       placeholder="介绍一下自己..."
                       rows={3}
-                      className="px-3 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {errors.bio && (
                       <p className="mt-1 text-sm text-red-600">{errors.bio}</p>

@@ -1,3 +1,35 @@
+/**
+ * 卡片组件系统 - 灵活的内容容器组件
+ *
+ * 主要组件：
+ * 1. Card - 主卡片容器
+ * 2. CardHeader - 卡片头部区域
+ * 3. CardTitle - 卡片标题
+ * 4. CardDescription - 卡片描述
+ * 5. CardContent - 卡片主要内容
+ * 6. CardFooter - 卡片底部操作区
+ *
+ * 设计变体：
+ * - default: 默认边框和阴影
+ * - elevated: 提升阴影效果
+ * - outlined: 强调边框样式
+ *
+ * 内边距选项：
+ * - none: 无内边距
+ * - sm/md/lg: 小/中/大内边距
+ *
+ * 特性：
+ * - 组合式设计模式
+ * - 完全可定制样式
+ * - TypeScript 类型安全
+ * - 响应式布局支持
+ *
+ * 使用技术：
+ * - React forwardRef 组件
+ * - Tailwind CSS 样式
+ * - 组件组合模式
+ * - HTML 语义化标签
+ */
 import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -59,7 +91,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
     <h3
       ref={ref}
       className={cn(
-        'text-lg font-semibold tracking-tight leading-none',
+        'text-lg font-semibold leading-none tracking-tight',
         className
       )}
       {...props}

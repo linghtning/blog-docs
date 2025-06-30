@@ -1,3 +1,26 @@
+/**
+ * Next.js 根布局组件 - 全局页面布局和配置
+ *
+ * 主要功能：
+ * 1. 定义全局页面结构和样式
+ * 2. 配置 Google 字体（Inter）
+ * 3. 设置 SEO 元数据和 Open Graph
+ * 4. 集成会话管理提供者
+ * 5. 配置多语言支持（中文）
+ *
+ * 特性：
+ * - 响应式设计基础样式
+ * - 字体预加载优化
+ * - SEO 友好的元数据配置
+ * - 社交媒体分享优化
+ * - 搜索引擎爬虫配置
+ *
+ * 使用技术：
+ * - Next.js 15 App Router
+ * - TypeScript 类型安全
+ * - Tailwind CSS 样式系统
+ * - NextAuth.js 会话管理
+ */
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { SessionProvider } from '@/components/providers/SessionProvider';

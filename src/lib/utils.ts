@@ -1,3 +1,29 @@
+/**
+ * 通用工具函数库 - 项目中常用的辅助函数集合
+ *
+ * 主要功能：
+ * 1. CSS 类名合并和处理
+ * 2. 文本格式化和处理
+ * 3. 日期时间格式化
+ * 4. 数据验证和清理
+ * 5. 性能优化函数（防抖、节流）
+ * 6. 文件大小格式化
+ * 7. 剪贴板和 DOM 操作
+ *
+ * 工具分类：
+ * - 样式工具：cn() 类名合并
+ * - 文本工具：截断、生成链接、验证
+ * - 时间工具：格式化、相对时间
+ * - 验证工具：邮箱、用户名、密码
+ * - 性能工具：防抖、节流、深拷贝
+ * - 格式化工具：文件大小、数字
+ *
+ * 使用技术：
+ * - clsx + tailwind-merge 样式合并
+ * - slugify 链接生成
+ * - Intl API 国际化
+ * - TypeScript 泛型
+ */
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import slugify from 'slugify';
