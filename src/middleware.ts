@@ -13,15 +13,16 @@
  * - 管理员路由：后台管理（需要 ADMIN 角色）
  *
  * 使用技术：
- * - NextAuth.js JWT 认证
+ * - Auth.js v5 认证
  * - Next.js 15 中间件 API
  * - 路径匹配配置
  */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { auth } from '@/lib/auth';
 
 export async function middleware(req: NextRequest) {
+  const session = await auth();
   const { pathname } = req.nextUrl;
 
   // 公开路由，不需要认证
@@ -40,15 +41,8 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    // 获取JWT token
-    const token = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET,
-      secureCookie: process.env.NODE_ENV === 'production',
-    });
-
     // 检查是否已登录，未登录则重定向到登录页
-    if (!token) {
+    if (!session || !session.user) {
       const loginUrl = new URL('/auth/login', req.url);
       if (pathname !== '/auth/login') {
         loginUrl.searchParams.set('redirect', pathname);
@@ -58,7 +52,7 @@ export async function middleware(req: NextRequest) {
 
     // 管理员路由保护
     if (pathname.startsWith('/admin')) {
-      if (token.role !== 'ADMIN') {
+      if (session.user.role !== 'ADMIN') {
         return NextResponse.redirect(
           new URL('/auth/login?error=admin_required', req.url)
         );
@@ -67,7 +61,7 @@ export async function middleware(req: NextRequest) {
 
     // 作者路由保护
     if (pathname.startsWith('/dashboard') || pathname.startsWith('/write')) {
-      if (token.role !== 'AUTHOR' && token.role !== 'ADMIN') {
+      if (session.user.role !== 'AUTHOR' && session.user.role !== 'ADMIN') {
         return NextResponse.redirect(
           new URL('/auth/login?error=author_required', req.url)
         );
@@ -77,7 +71,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware error:', error);
-    // 如果JWT验证失败，重定向到登录页
+    // 如果认证验证失败，重定向到登录页
     return NextResponse.redirect(
       new URL('/auth/login?error=auth_error', req.url)
     );
@@ -88,7 +82,7 @@ export const config = {
   matcher: [
     /*
      * 匹配所有请求路径，除了以下情况：
-     * - api/auth/* (NextAuth API路由)
+     * - api/auth/* (Auth.js API路由)
      * - _next/static (静态文件)
      * - _next/image (图片优化文件)
      * - favicon.ico (网站图标)

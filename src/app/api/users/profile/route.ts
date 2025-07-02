@@ -46,10 +46,9 @@
  * - BigInt 序列化处理
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { z } from 'zod';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { auth } from '@/lib/auth';
+import { z } from 'zod';
 
 const updateProfileSchema = z.object({
   username: z
@@ -70,7 +69,7 @@ const updateProfileSchema = z.object({
 // 获取用户资料
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -152,7 +151,7 @@ export async function GET() {
 // 更新用户资料
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(

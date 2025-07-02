@@ -30,11 +30,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getServerSession } from 'next-auth';
-import { z } from 'zod';
-import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
+import bcrypt from 'bcryptjs';
+import { z } from 'zod';
 
 // 表单数据验证模式
 const registerSchema = z.object({
@@ -156,7 +155,7 @@ export async function registerUser(formData: FormData) {
 // 更新用户资料 Server Action
 export async function updateProfile(formData: FormData) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return {

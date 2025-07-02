@@ -1,11 +1,11 @@
 /**
- * NextAuth.js 认证配置 - 用户身份验证和会话管理
+ * Auth.js v5 认证配置 - 用户身份验证和会话管理
  *
  * 主要功能：
  * 1. 配置认证提供者（邮箱密码登录）
  * 2. 处理用户登录验证逻辑
  * 3. 管理 JWT 令牌和会话
- * 4. 扩展 NextAuth 类型定义
+ * 4. 扩展 Auth.js 类型定义
  * 5. 集成 Prisma 数据库适配器
  *
  * 认证流程：
@@ -22,19 +22,19 @@
  * - 角色权限控制
  *
  * 使用技术：
- * - NextAuth.js v4
+ * - Auth.js v5
  * - Prisma ORM
  * - bcryptjs 加密
  * - Zod 验证库
  */
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from './db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
-// 扩展 NextAuth 类型
+// 扩展 Auth.js 类型
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -54,7 +54,7 @@ declare module 'next-auth' {
   }
 }
 
-declare module 'next-auth/jwt' {
+declare module '@auth/core/jwt' {
   interface JWT {
     role?: string;
     username?: string;
@@ -66,7 +66,7 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
   session: {
@@ -76,7 +76,7 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/login',
   },
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
@@ -136,4 +136,4 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-};
+});
