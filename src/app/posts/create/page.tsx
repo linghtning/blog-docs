@@ -182,6 +182,7 @@ export default function CreatePostPage() {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="输入文章标题..."
+                helperText="一个好的标题能吸引更多读者"
                 className="text-xl font-semibold"
                 required
               />
@@ -189,7 +190,7 @@ export default function CreatePostPage() {
 
             {/* 摘要 */}
             <Card className="p-6">
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
                 文章摘要
               </label>
               <textarea
@@ -198,9 +199,12 @@ export default function CreatePostPage() {
                   setFormData({ ...formData, summary: e.target.value })
                 }
                 placeholder="简要描述文章内容..."
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border-input placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 rows={3}
               />
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                摘要将显示在文章列表中，建议控制在100-200字
+              </p>
             </Card>
 
             {/* Markdown编辑器 */}
@@ -210,7 +214,9 @@ export default function CreatePostPage() {
               </label>
               <MarkdownEditor
                 value={formData.content}
-                onChange={(content) => setFormData({ ...formData, content })}
+                onChange={(content: string) =>
+                  setFormData({ ...formData, content })
+                }
                 placeholder="开始写作你的文章..."
               />
             </Card>
@@ -271,12 +277,14 @@ export default function CreatePostPage() {
               <h3 className="mb-4 text-lg font-medium text-gray-900">标签</h3>
               <div className="space-y-3">
                 <Input
+                  label="添加标签"
                   value={tagInput}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setTagInput(e.target.value)
                   }
                   onKeyPress={handleTagInputKeyPress}
-                  placeholder="输入标签名，按回车添加"
+                  placeholder="输入标签名，按回车或逗号添加"
+                  helperText="标签有助于读者发现相关内容"
                 />
                 {selectedTags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -305,10 +313,10 @@ export default function CreatePostPage() {
                 特色图片
               </h3>
               <FileUpload
-                onUpload={(url) =>
+                onUpload={(url: string) =>
                   setFormData({ ...formData, featuredImage: url })
                 }
-                onError={(error) => alert(error)}
+                onError={(error: string) => alert(error)}
               />
               {formData.featuredImage && (
                 <div className="mt-4">

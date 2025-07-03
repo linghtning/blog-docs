@@ -335,23 +335,20 @@ export default function CategoriesManagePage() {
                 }
               >
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      分类名称 *
-                    </label>
-                    <Input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="输入分类名称"
-                      required
-                    />
-                  </div>
+                  <Input
+                    label="分类名称"
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    placeholder="输入分类名称"
+                    helperText="分类名称将作为导航和筛选的标识"
+                    required
+                  />
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
                       分类描述
                     </label>
                     <textarea
@@ -363,13 +360,16 @@ export default function CategoriesManagePage() {
                         })
                       }
                       placeholder="输入分类描述"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="border-input placeholder:text-muted-foreground focus-visible:ring-ring w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                       rows={3}
                     />
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      可选：为分类添加详细描述
+                    </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
                       分类颜色
                     </label>
                     <div className="flex items-center space-x-2">
@@ -379,7 +379,7 @@ export default function CategoriesManagePage() {
                         onChange={(e) =>
                           setFormData({ ...formData, color: e.target.value })
                         }
-                        className="h-10 w-20 rounded border border-gray-300"
+                        className="border-input h-9 w-20 rounded border bg-transparent"
                       />
                       <Input
                         type="text"
@@ -388,27 +388,25 @@ export default function CategoriesManagePage() {
                           setFormData({ ...formData, color: e.target.value })
                         }
                         placeholder="#007bff"
+                        helperText="用于标识分类的颜色"
                         className="flex-1"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      排序权重
-                    </label>
-                    <Input
-                      type="number"
-                      value={formData.sortOrder}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          sortOrder: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      placeholder="0"
-                    />
-                  </div>
+                  <Input
+                    label="排序权重"
+                    type="number"
+                    value={formData.sortOrder}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        sortOrder: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    placeholder="0"
+                    helperText="数字越小排序越靠前，相同权重按创建时间排序"
+                  />
                 </div>
 
                 <div className="mt-6 flex justify-end space-x-3">

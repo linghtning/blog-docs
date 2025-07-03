@@ -55,6 +55,8 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      '1': 'rem',
+      '4': 'px',
       colors: {
         primary: {
           '50': '#eff6ff',
@@ -118,6 +120,16 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
@@ -133,12 +145,9 @@ const config: Config = {
               marginTop: '3em',
               marginBottom: '3em',
             },
-            'h1, h2, h3, h4': {
-              color: theme('colors.gray.900'),
-            },
             a: {
               color: theme('colors.primary.600'),
-              textDecoration: 'none',
+              textDecoration: 'underline',
               '&:hover': {
                 textDecoration: 'underline',
               },
@@ -146,50 +155,51 @@ const config: Config = {
             strong: {
               color: theme('colors.gray.900'),
             },
+            blockquote: {
+              backgroundColor: theme('colors.gray.50'),
+              borderLeftColor: theme('colors.gray.300'),
+              paddingLeft: '1rem',
+              paddingRight: '1rem',
+              paddingTop: '0.5rem',
+              paddingBottom: '0.5rem',
+              borderRadius: '0.375rem',
+              fontSize: '1rem',
+              '&::before': {
+                content: '""',
+              },
+            },
             code: {
               color: theme('colors.gray.900'),
-              backgroundColor: theme('colors.gray.100'),
-              paddingLeft: '4px',
-              paddingRight: '4px',
-              paddingTop: '2px',
-              paddingBottom: '2px',
-              borderRadius: '0.25rem',
-              fontSize: '0.875em',
-            },
-            'code::before': {
-              content: '""',
-            },
-            'code::after': {
-              content: '""',
             },
             pre: {
-              backgroundColor: theme('colors.gray.900'),
-              color: theme('colors.gray.100'),
-            },
-            blockquote: {
-              borderLeftColor: theme('colors.primary.500'),
-              backgroundColor: theme('colors.gray.50'),
+              backgroundColor: theme('colors.gray.100'),
+              color: theme('colors.gray.800'),
               padding: '1rem',
-              borderRadius: '0.5rem',
             },
           },
         },
         dark: {
           css: {
             color: theme('colors.gray.300'),
-            'h1, h2, h3, h4': {
-              color: theme('colors.gray.100'),
+            hr: {
+              borderColor: theme('colors.gray.700'),
+            },
+            a: {
+              color: theme('colors.primary.400'),
             },
             strong: {
               color: theme('colors.gray.100'),
             },
-            code: {
-              backgroundColor: theme('colors.gray.800'),
-              color: theme('colors.gray.100'),
-            },
             blockquote: {
               backgroundColor: theme('colors.gray.800'),
-              borderLeftColor: theme('colors.primary.400'),
+              borderLeftColor: theme('colors.gray.600'),
+            },
+            code: {
+              color: theme('colors.gray.200'),
+            },
+            pre: {
+              backgroundColor: theme('colors.gray.800'),
+              color: theme('colors.gray.200'),
             },
           },
         },
@@ -199,10 +209,32 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      keyframes: {
+        'accordion-down': {
+          from: {
+            height: '0',
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+        },
+        'accordion-up': {
+          from: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+          to: {
+            height: '0',
+          },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
+      },
     },
   },
   plugins: [typography, tailwindcssAnimate],
-  darkMode: ['class', 'class'],
+  darkMode: ['class'],
 };
 
 export default config;

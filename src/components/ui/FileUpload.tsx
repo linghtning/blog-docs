@@ -1,207 +1,162 @@
-/**
- * 文件上传组件 - 支持拖拽和点击上传
- *
- * 主要功能：
- * 1. 拖拽上传支持
- * 2. 文件类型和大小验证
- * 3. 上传进度显示
- * 4. 预览功能
- * 5. 错误处理
- *
- * 使用技术：
- * - React Hooks状态管理
- * - 文件拖拽API
- * - FormData API
- * - TypeScript类型安全
- */
-
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 interface FileUploadProps {
   onUpload: (url: string) => void;
-  onError?: (error: string) => void;
+  onError: (error: string) => void;
   accept?: string;
-  maxSize?: number; // in bytes
+  maxSize?: number; // 以 MB 为单位
   className?: string;
 }
 
-export function FileUpload({
+const FileUpload: React.FC<FileUploadProps> = ({
   onUpload,
   onError,
   accept = 'image/*',
-  maxSize = 5 * 1024 * 1024, // 5MB
+  maxSize = 5,
   className,
-}: FileUploadProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+}) => {
+  const [isDragOver, setIsDragOver] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = useCallback(
-    async (file: File) => {
-      if (file.size > maxSize) {
-        onError?.('文件太大，最大支持 5MB');
-        return;
+  const handleFileUpload = async (file: File) => {
+    // 检查文件大小
+    if (file.size > maxSize * 1024 * 1024) {
+      onError(`文件大小不能超过 ${maxSize}MB`);
+      return;
+    }
+
+    // 检查文件类型
+    if (accept !== '*' && !file.type.match(accept.replace('*', '.*'))) {
+      onError('不支持的文件类型');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || '上传失败');
       }
 
-      setIsUploading(true);
-      setPreview(URL.createObjectURL(file));
-
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || '上传失败');
-        }
-
-        const data = await response.json();
-        onUpload(data.url);
-      } catch (error) {
-        console.error('Upload error:', error);
-        onError?.(error instanceof Error ? error.message : '上传失败');
-        setPreview(null);
-      } finally {
-        setIsUploading(false);
+      const result = await response.json();
+      if (result.success && result.data?.url) {
+        onUpload(result.data.url);
+      } else {
+        throw new Error('上传成功但无法获取文件URL');
       }
-    },
-    [maxSize, onError, onUpload]
-  );
+    } catch (error) {
+      console.error('文件上传失败:', error);
+      onError(error instanceof Error ? error.message : '上传失败');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  }, []);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-  }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
 
-      const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
-        handleFileUpload(files[0]);
-      }
-    },
-    [handleFileUpload]
-  );
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
 
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        handleFileUpload(files[0]);
-      }
-    },
-    [handleFileUpload]
-  );
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
 
-  const handleClick = () => {
-    fileInputRef.current?.click();
+  const openFileDialog = () => {
+    inputRef.current?.click();
   };
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('w-full', className)}>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
       <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         className={cn(
-          'relative cursor-pointer rounded-lg border-2 border-dashed p-6 transition-colors',
+          'cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors',
           isDragOver
-            ? 'border-blue-500 bg-blue-50'
+            ? 'border-blue-400 bg-blue-50'
             : 'border-gray-300 hover:border-gray-400',
           isUploading && 'pointer-events-none opacity-50'
         )}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleClick}
+        onClick={openFileDialog}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={accept}
-          onChange={handleFileSelect}
-          className="hidden"
-          disabled={isUploading}
-        />
-
-        <div className="flex flex-col items-center justify-center space-y-2">
-          {isUploading ? (
-            <>
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500" />
-              <p className="text-sm text-gray-600">上传中...</p>
-            </>
-          ) : (
-            <>
-              <svg
-                className="h-8 w-8 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <div className="text-center">
-                <p className="text-sm font-medium text-gray-900">
-                  点击上传或拖拽图片到此处
-                </p>
-                <p className="text-xs text-gray-500">
-                  支持 PNG、JPG、GIF 格式，最大 5MB
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {preview && (
-        <div className="relative">
-          <img
-            src={preview}
-            alt="预览"
-            className="h-auto max-w-full rounded-lg shadow-md"
-            style={{ maxHeight: '200px' }}
-          />
-          {!isUploading && (
-            <button
-              onClick={() => setPreview(null)}
-              className="absolute right-2 top-2 rounded-full bg-red-500 p-1 text-white transition-colors hover:bg-red-600"
+        {isUploading ? (
+          <div className="space-y-2">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500" />
+            <p className="text-sm text-gray-600">正在上传...</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              stroke="currentColor"
+              fill="none"
+              viewBox="0 0 48 48"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          )}
-        </div>
-      )}
+              <path
+                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div className="text-sm text-gray-600">
+              <p>
+                <span className="font-medium text-blue-600 hover:text-blue-500">
+                  点击上传
+                </span>{' '}
+                或拖拽文件到此处
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                支持 {accept}，最大 {maxSize}MB
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+FileUpload.displayName = 'FileUpload';
+
+export { FileUpload };
