@@ -21,6 +21,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: '首页 | 博客平台',
@@ -202,10 +203,11 @@ export default async function HomePage() {
                       {/* 特色图片 */}
                       {post.featuredImage && (
                         <div className="relative aspect-video overflow-hidden">
-                          <img
+                          <Image
                             src={post.featuredImage}
                             alt={post.title}
-                            className="h-full w-full object-cover"
+                            fill
+                            className="object-cover"
                           />
                         </div>
                       )}
@@ -264,10 +266,12 @@ export default async function HomePage() {
                             {/* 作者 */}
                             <div className="flex items-center space-x-2">
                               {post.author.avatarUrl ? (
-                                <img
+                                <Image
                                   src={post.author.avatarUrl}
                                   alt={post.author.username}
-                                  className="h-6 w-6 rounded-full"
+                                  width={24}
+                                  height={24}
+                                  className="rounded-full"
                                 />
                               ) : (
                                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-300">
