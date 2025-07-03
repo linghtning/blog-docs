@@ -20,10 +20,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { MarkdownEditor } from '@/components/ui/MarkdownEditor';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 import { FileUpload } from '@/components/ui/FileUpload';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import Image from 'next/image';
 
 interface Category {
   id: number;
@@ -170,7 +178,7 @@ export default function CreatePostPage() {
               <Input
                 label="文章标题"
                 value={formData.title}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="输入文章标题..."
@@ -224,7 +232,7 @@ export default function CreatePostPage() {
                 </Button>
                 <Button
                   onClick={() => handleSubmit('PUBLISHED')}
-                  variant="primary"
+                  variant="default"
                   className="w-full"
                   loading={isLoading}
                 >
@@ -236,20 +244,26 @@ export default function CreatePostPage() {
             {/* 分类选择 */}
             <Card className="p-6">
               <h3 className="mb-4 text-lg font-medium text-gray-900">分类</h3>
-              <select
+              <Select
                 value={formData.categoryId}
-                onChange={(e) =>
-                  setFormData({ ...formData, categoryId: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, categoryId: value })
                 }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">选择分类</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="选择分类" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem
+                      key={category.id}
+                      value={category.id.toString()}
+                    >
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Card>
 
             {/* 标签 */}
@@ -258,7 +272,9 @@ export default function CreatePostPage() {
               <div className="space-y-3">
                 <Input
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setTagInput(e.target.value)
+                  }
                   onKeyPress={handleTagInputKeyPress}
                   placeholder="输入标签名，按回车添加"
                 />
@@ -296,10 +312,12 @@ export default function CreatePostPage() {
               />
               {formData.featuredImage && (
                 <div className="mt-4">
-                  <img
+                  <Image
                     src={formData.featuredImage}
                     alt="特色图片"
-                    className="h-32 w-full rounded-lg object-cover"
+                    width={128}
+                    height={128}
+                    className="rounded-lg object-cover"
                   />
                   <button
                     onClick={() =>

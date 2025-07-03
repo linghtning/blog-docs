@@ -20,9 +20,9 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
 interface Post {
   id: string;
@@ -414,7 +414,7 @@ export default function MyPostsPage() {
                   return (
                     <Button
                       key={page}
-                      variant={currentPage === page ? 'primary' : 'outline'}
+                      variant={currentPage === page ? 'default' : 'outline'}
                       onClick={() => loadPosts(page)}
                     >
                       {page}

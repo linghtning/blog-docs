@@ -38,9 +38,9 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
             <Input
               label="密码"
-              type="text"
+              type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}

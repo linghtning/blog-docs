@@ -16,7 +16,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 
 export const metadata: Metadata = {
   title: '分类 - 博客平台',

@@ -42,7 +42,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
@@ -50,8 +50,8 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 export default function ComponentsTestPage() {
   const [inputValue, setInputValue] = useState('');

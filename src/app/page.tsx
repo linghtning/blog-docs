@@ -19,8 +19,8 @@ import { Metadata } from 'next';
 import { prisma } from '@/lib/db';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
 export const metadata: Metadata = {
@@ -361,7 +361,7 @@ export default async function HomePage() {
               </h3>
               <div className="space-y-3">
                 <Link href="/posts/create">
-                  <Button variant="primary" className="w-full">
+                  <Button variant="default" className="w-full">
                     写文章
                   </Button>
                 </Link>
