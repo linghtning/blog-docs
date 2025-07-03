@@ -24,6 +24,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import SessionProvider from '@/components/providers/SessionProvider';
+import { Navbar } from '@/components/layout/Navbar';
 import './globals.css';
 
 const inter = Inter({
@@ -80,7 +81,10 @@ export default function RootLayout({
     <html lang="zh-CN" className={inter.variable}>
       <body className={inter.className}>
         <SessionProvider>
-          <div className="min-h-screen bg-gray-50">{children}</div>
+          <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            {children}
+          </div>
         </SessionProvider>
       </body>
     </html>

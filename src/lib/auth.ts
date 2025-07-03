@@ -42,6 +42,7 @@ declare module 'next-auth' {
       email: string;
       username: string;
       role: string;
+      avatarUrl?: string | null;
     };
   }
 
@@ -50,7 +51,7 @@ declare module 'next-auth' {
     email: string;
     username: string;
     role: string;
-    avatar?: string;
+    avatarUrl?: string | null;
   }
 }
 
@@ -58,6 +59,7 @@ declare module '@auth/core/jwt' {
   interface JWT {
     role?: string;
     username?: string;
+    avatarUrl?: string | null;
   }
 }
 
@@ -110,7 +112,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             id: user.id.toString(),
             email: user.email,
             username: user.username,
-            avatar: user.avatarUrl || undefined,
+            avatarUrl: user.avatarUrl,
             role: user.role,
           };
         } catch {
@@ -124,6 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.role = user.role;
         token.username = user.username;
+        token.avatarUrl = user.avatarUrl;
       }
       return token;
     },
@@ -132,6 +135,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.sub!;
         session.user.role = token.role as string;
         session.user.username = token.username as string;
+        session.user.avatarUrl = token.avatarUrl;
       }
       return session;
     },

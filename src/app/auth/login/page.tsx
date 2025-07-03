@@ -98,7 +98,6 @@ export default function LoginPage() {
         password: formData.password,
         redirect: false,
       });
-      console.log('result :>> ', result);
 
       if (result?.error) {
         setErrors({ submit: '邮箱或密码错误' });
@@ -136,7 +135,7 @@ export default function LoginPage() {
 
             <Input
               label="密码"
-              type="password"
+              type="text"
               name="password"
               value={formData.password}
               onChange={handleChange}
