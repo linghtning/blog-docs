@@ -366,7 +366,7 @@ export default async function HomePage() {
                   </Button>
                 </Link>
                 <Link href="/auth/register">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="mt-2 w-full">
                     注册账号
                   </Button>
                 </Link>
