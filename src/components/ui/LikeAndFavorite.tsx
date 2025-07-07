@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from './button';
 
@@ -25,14 +25,7 @@ export function LikeAndFavorite({
   const [likingLoading, setLikingLoading] = useState(false);
   const [favoritingLoading, setFavoritingLoading] = useState(false);
 
-  // 检查当前用户的点赞和收藏状态
-  useEffect(() => {
-    if (session?.user?.id) {
-      checkUserStatus();
-    }
-  }, [session, postId]);
-
-  const checkUserStatus = async () => {
+  const checkUserStatus = useCallback(async () => {
     try {
       // 并行检查点赞和收藏状态
       const [likesResponse, favoritesResponse] = await Promise.all([
@@ -58,7 +51,14 @@ export function LikeAndFavorite({
     } catch (error) {
       console.error('检查用户状态失败:', error);
     }
-  };
+  }, [postId]);
+
+  // 检查当前用户的点赞和收藏状态
+  useEffect(() => {
+    if (session?.user?.id) {
+      checkUserStatus();
+    }
+  }, [session, postId, checkUserStatus]);
 
   // 处理点赞
   const handleLike = async () => {

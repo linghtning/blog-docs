@@ -16,7 +16,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -96,47 +96,50 @@ export default function MyPostsPage() {
   }, [status, router]);
 
   // 加载文章列表
-  const loadPosts = async (page = 1) => {
-    if (!session?.user?.id) return;
+  const loadPosts = useCallback(
+    async (page = 1) => {
+      if (!session?.user?.id) return;
 
-    try {
-      setIsLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '10',
-        authorId: session.user.id,
-      });
+      try {
+        setIsLoading(true);
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: '10',
+          authorId: session.user.id,
+        });
 
-      if (statusFilter) {
-        params.append('status', statusFilter);
-      }
-
-      if (searchTerm) {
-        params.append('search', searchTerm);
-      }
-
-      const response = await fetch(`/api/posts?${params}`);
-      if (response.ok) {
-        const data: PostsResponse = await response.json();
-        if (data.success) {
-          setPosts(data.data.posts);
-          setCurrentPage(data.data.pagination.page);
-          setTotalPages(data.data.pagination.totalPages);
-          setTotal(data.data.pagination.total);
+        if (statusFilter) {
+          params.append('status', statusFilter);
         }
+
+        if (searchTerm) {
+          params.append('search', searchTerm);
+        }
+
+        const response = await fetch(`/api/posts?${params}`);
+        if (response.ok) {
+          const data: PostsResponse = await response.json();
+          if (data.success) {
+            setPosts(data.data.posts);
+            setCurrentPage(data.data.pagination.page);
+            setTotalPages(data.data.pagination.totalPages);
+            setTotal(data.data.pagination.total);
+          }
+        }
+      } catch (error) {
+        console.error('加载文章失败:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('加载文章失败:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [session?.user?.id, statusFilter, searchTerm]
+  );
 
   useEffect(() => {
     if (session?.user?.id) {
       loadPosts(1);
     }
-  }, [session?.user?.id, statusFilter, searchTerm]);
+  }, [session?.user?.id, statusFilter, searchTerm, loadPosts]);
 
   // 删除文章
   const handleDeletePost = async (postId: string) => {

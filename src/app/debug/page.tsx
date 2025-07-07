@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -29,7 +29,7 @@ export default function DebugPage() {
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
 
   // 检查用户信息
-  const checkUserInfo = () => {
+  const checkUserInfo = useCallback(() => {
     console.log('Session:', session);
     setDebugInfo({
       session: session,
@@ -38,10 +38,10 @@ export default function DebugPage() {
       username: session?.user?.username,
       email: session?.user?.email,
     });
-  };
+  }, [session]);
 
   // 测试API调用
-  const testApiCall = async () => {
+  const testApiCall = useCallback(async () => {
     if (!session?.user?.id) return;
 
     try {
@@ -62,7 +62,7 @@ export default function DebugPage() {
       console.error('API调用失败:', error);
       setApiResponse({ error: (error as Error).message });
     }
-  };
+  }, [session?.user?.id]);
 
   // 创建测试文章
   const createTestPost = async () => {
@@ -102,7 +102,7 @@ export default function DebugPage() {
       checkUserInfo();
       testApiCall();
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, checkUserInfo, testApiCall]);
 
   if (status === 'loading') {
     return <div>加载中...</div>;

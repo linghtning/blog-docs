@@ -15,7 +15,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -81,44 +81,47 @@ export default function DraftsPage() {
   }, [status, router]);
 
   // 加载草稿列表
-  const loadDrafts = async (page = 1) => {
-    if (!session?.user?.id) return;
+  const loadDrafts = useCallback(
+    async (page = 1) => {
+      if (!session?.user?.id) return;
 
-    try {
-      setIsLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '10',
-        authorId: session.user.id,
-        status: 'DRAFT',
-      });
+      try {
+        setIsLoading(true);
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: '10',
+          authorId: session.user.id,
+          status: 'DRAFT',
+        });
 
-      if (searchTerm) {
-        params.append('search', searchTerm);
-      }
-
-      const response = await fetch(`/api/posts?${params}`);
-      if (response.ok) {
-        const data: PostsResponse = await response.json();
-        if (data.success) {
-          setPosts(data.data.posts);
-          setCurrentPage(data.data.pagination.page);
-          setTotalPages(data.data.pagination.totalPages);
-          setTotal(data.data.pagination.total);
+        if (searchTerm) {
+          params.append('search', searchTerm);
         }
+
+        const response = await fetch(`/api/posts?${params}`);
+        if (response.ok) {
+          const data: PostsResponse = await response.json();
+          if (data.success) {
+            setPosts(data.data.posts);
+            setCurrentPage(data.data.pagination.page);
+            setTotalPages(data.data.pagination.totalPages);
+            setTotal(data.data.pagination.total);
+          }
+        }
+      } catch (error) {
+        console.error('加载草稿失败:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('加载草稿失败:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [session?.user?.id, searchTerm]
+  );
 
   useEffect(() => {
     if (session?.user?.id) {
       loadDrafts(1);
     }
-  }, [session?.user?.id, searchTerm]);
+  }, [session?.user?.id, searchTerm, loadDrafts]);
 
   // 删除草稿
   const handleDeleteDraft = async (postId: string) => {
