@@ -1,12 +1,13 @@
 /**
- * 文章创建页面 - 写作和发布新文章
+ * 文章编辑页面 - 编辑现有文章
  *
  * 主要功能：
- * 1. Markdown编辑器
- * 2. 文章元信息编辑
- * 3. 分类和标签选择
- * 4. 草稿保存和发布
- * 5. 图片上传
+ * 1. 加载现有文章数据
+ * 2. Markdown编辑器
+ * 3. 文章元信息编辑
+ * 4. 分类和标签选择
+ * 5. 草稿保存和发布
+ * 6. 图片上传
  *
  * 使用技术：
  * - Next.js App Router
@@ -40,13 +41,21 @@ interface Category {
   color: string;
 }
 
-export default function CreatePostPage() {
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default function EditPostPage({ params }: PageProps) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingPost, setIsLoadingPost] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [postId, setPostId] = useState<string>('');
 
   // 表单状态
   const [formData, setFormData] = useState({
@@ -58,25 +67,72 @@ export default function CreatePostPage() {
     status: 'DRAFT' as 'DRAFT' | 'PUBLISHED',
   });
 
-  // 加载分类和标签
+  // 加载文章ID
   useEffect(() => {
-    const loadData = async () => {
+    const loadParams = async () => {
+      const resolvedParams = await params;
+      setPostId(resolvedParams.id);
+    };
+    loadParams();
+  }, [params]);
+
+  // 加载文章数据
+  useEffect(() => {
+    const loadPost = async () => {
+      if (!postId) return;
+
+      try {
+        const response = await fetch(`/api/posts/${postId}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data?.post) {
+            const post = result.data.post;
+            setFormData({
+              title: post.title || '',
+              summary: post.summary || '',
+              content: post.content || '',
+              categoryId: post.categoryId ? post.categoryId.toString() : '',
+              featuredImage: post.featuredImage || '',
+              status: post.status,
+            });
+            setSelectedTags(
+              post.tags?.map((tag: { name: string }) => tag.name) || []
+            );
+          }
+        } else {
+          alert('加载文章失败');
+          router.push('/');
+        }
+      } catch (error) {
+        console.error('加载文章失败:', error);
+        alert('加载文章失败');
+        router.push('/');
+      } finally {
+        setIsLoadingPost(false);
+      }
+    };
+
+    loadPost();
+  }, [postId, router]);
+
+  // 加载分类
+  useEffect(() => {
+    const loadCategories = async () => {
       try {
         const categoriesRes = await fetch('/api/categories');
 
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json();
-          // 从 API 响应中提取分类数组
           if (categoriesData.success && categoriesData.data?.categories) {
             setCategories(categoriesData.data.categories);
           }
         }
       } catch (error) {
-        console.error('加载数据失败:', error);
+        console.error('加载分类失败:', error);
       }
     };
 
-    loadData();
+    loadCategories();
   }, []);
 
   // 重定向未登录用户
@@ -113,8 +169,8 @@ export default function CreatePostPage() {
         tags: selectedTags,
       };
 
-      const response = await fetch('/api/posts', {
-        method: 'POST',
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -127,10 +183,10 @@ export default function CreatePostPage() {
       }
 
       const result = await response.json();
-      if (result.success && result.data?.post?.id) {
-        router.push(`/posts/${result.data.post.id}`);
+      if (result.success) {
+        router.push(`/posts/${postId}`);
       } else {
-        throw new Error('创建文章成功但无法获取文章ID');
+        throw new Error('保存文章失败');
       }
     } catch (error) {
       console.error('保存文章失败:', error);
@@ -159,7 +215,7 @@ export default function CreatePostPage() {
     }
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || isLoadingPost) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500" />
@@ -175,8 +231,8 @@ export default function CreatePostPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">创建文章</h1>
-          <p className="mt-2 text-gray-600">分享你的想法和见解</p>
+          <h1 className="text-3xl font-bold text-gray-900">编辑文章</h1>
+          <p className="mt-2 text-gray-600">修改你的文章内容</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -251,7 +307,7 @@ export default function CreatePostPage() {
                   className="w-full"
                   loading={isLoading}
                 >
-                  立即发布
+                  {formData.status === 'PUBLISHED' ? '更新发布' : '立即发布'}
                 </Button>
               </div>
             </Card>

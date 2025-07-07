@@ -62,45 +62,61 @@ import slugify from 'slugify';
 import { PostStatus, Prisma } from '@prisma/client';
 
 // 文章创建验证schema
-const createPostSchema = z.object({
-  title: z
-    .string()
-    .min(1, '文章标题不能为空')
-    .max(200, '文章标题最多200个字符'),
-  content: z.string().min(1, '文章内容不能为空'),
-  summary: z.string().optional(),
-  categoryId: z.number().optional(),
-  tags: z.array(z.string()).optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED']).default('DRAFT'),
-  featuredImage: z.string().optional(),
-});
+const createPostSchema = z
+  .object({
+    title: z.string().max(200, '文章标题最多200个字符').optional().default(''),
+    content: z.string().optional().default(''),
+    summary: z.string().optional(),
+    categoryId: z.number().optional(),
+    tags: z.array(z.string()).optional(),
+    status: z.enum(['DRAFT', 'PUBLISHED']).default('DRAFT'),
+    featuredImage: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      // 对于草稿，标题或内容其中一个不为空即可
+      if (data.status === 'DRAFT') {
+        return data.title?.trim() || data.content?.trim();
+      }
+      // 对于发布，标题和内容都不能为空
+      return data.title?.trim() && data.content?.trim();
+    },
+    {
+      message:
+        '草稿需要标题或内容其中一个不为空，发布文章需要标题和内容都不为空',
+    }
+  );
 
 // 文章查询参数schema
 const querySchema = z.object({
   page: z
     .string()
+    .nullable()
     .transform((val) => {
+      if (!val) return 1;
       const num = Number(val);
       return isNaN(num) ? 1 : Math.max(num, 1);
-    })
-    .default('1'),
+    }),
   limit: z
     .string()
+    .nullable()
     .transform((val) => {
+      if (!val) return 10;
       const num = Number(val);
       return isNaN(num) ? 10 : Math.min(Math.max(num, 1), 50);
-    })
-    .default('10'),
-  status: z.nativeEnum(PostStatus).optional(),
+    }),
+  status: z.nativeEnum(PostStatus).nullable().optional(),
   categoryId: z
     .string()
+    .nullable()
     .transform((val) => {
+      if (!val) return undefined;
       const num = Number(val);
       return isNaN(num) ? undefined : num;
     })
     .optional(),
-  search: z.string().optional(),
-  authorId: z.string().optional(),
+  search: z.string().nullable().optional(),
+  authorId: z.string().nullable().optional(),
 });
 
 // 定义查询结果类型
@@ -146,8 +162,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = querySchema.parse({
-      page: searchParams.get('page') || '1',
-      limit: searchParams.get('limit') || '10',
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
       status: searchParams.get('status'),
       categoryId: searchParams.get('categoryId'),
       search: searchParams.get('search'),
@@ -325,7 +341,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 生成唯一的slug
-    const baseSlug = slugify(data.title, { lower: true, strict: true });
+    const title = data.title?.trim() || '';
+    const content = data.content?.trim() || '';
+
+    // 如果标题为空，使用内容的前20个字符作为标题
+    const displayTitle = title || content.substring(0, 20) || '无标题';
+
+    const baseSlug = slugify(displayTitle, { lower: true, strict: true });
     let slug = baseSlug;
     let counter = 1;
 
@@ -343,15 +365,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 计算阅读时间（约每分钟200字）
-    const wordCount = data.content.length;
-    const readingTime = Math.ceil(wordCount / 200);
+    const wordCount = content.length;
+    const readingTime = Math.ceil(wordCount / 200) || 1;
 
     // 创建文章
     const post = await prisma.post.create({
       data: {
-        title: data.title,
+        title: title || displayTitle,
         slug,
-        content: data.content,
+        content: content,
         summary: data.summary,
         status: data.status,
         featuredImage: data.featuredImage,

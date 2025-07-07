@@ -81,19 +81,37 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import slugify from 'slugify';
 
-const updatePostSchema = z.object({
-  title: z
-    .string()
-    .min(1, '文章标题不能为空')
-    .max(200, '文章标题最多200个字符')
-    .optional(),
-  content: z.string().min(1, '文章内容不能为空').optional(),
-  summary: z.string().optional(),
-  categoryId: z.number().nullable().optional(),
-  tags: z.array(z.string()).optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
-  featuredImage: z.string().nullable().optional(),
-});
+const updatePostSchema = z
+  .object({
+    title: z.string().max(200, '文章标题最多200个字符').optional(),
+    content: z.string().optional(),
+    summary: z.string().optional(),
+    categoryId: z.number().nullable().optional(),
+    tags: z.array(z.string()).optional(),
+    status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
+    featuredImage: z.string().nullable().optional(),
+  })
+  .refine(
+    (data) => {
+      // 对于草稿，标题或内容其中一个不为空即可（如果提供了的话）
+      if (data.status === 'DRAFT') {
+        return true; // 草稿允许任何内容
+      }
+      // 对于发布，如果提供了标题或内容，都不能为空
+      if (data.status === 'PUBLISHED') {
+        if (data.title !== undefined && !data.title.trim()) {
+          return false;
+        }
+        if (data.content !== undefined && !data.content.trim()) {
+          return false;
+        }
+      }
+      return true;
+    },
+    {
+      message: '发布文章的标题和内容不能为空',
+    }
+  );
 
 export async function GET(
   request: NextRequest,
@@ -132,11 +150,28 @@ export async function GET(
       );
     }
 
+    // 获取当前用户会话
+    const session = await auth();
+
+    // 构建查询条件：已发布的文章任何人都可以查看，草稿只有作者可以查看
     const post = await prisma.post.findFirst({
-      where: {
-        id: postId,
-        deletedAt: null,
-      },
+      where: session?.user?.id
+        ? {
+            id: postId,
+            deletedAt: null,
+            OR: [
+              { status: 'PUBLISHED' },
+              {
+                status: 'DRAFT',
+                authorId: BigInt(session.user.id),
+              },
+            ],
+          }
+        : {
+            id: postId,
+            status: 'PUBLISHED',
+            deletedAt: null,
+          },
       include: {
         author: {
           select: {

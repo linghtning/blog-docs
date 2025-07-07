@@ -25,6 +25,9 @@ import rehypeRaw from 'rehype-raw';
 import { prisma } from '@/lib/db';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { Comments } from '@/components/ui/Comments';
+import { LikeAndFavorite } from '@/components/ui/LikeAndFavorite';
+import { auth } from '@/lib/auth';
 
 interface PageProps {
   params: Promise<{
@@ -48,12 +51,29 @@ async function getPost(id: string) {
       return null;
     }
 
+    // 获取当前用户会话
+    const session = await auth();
+
+    // 如果是已发布的文章，任何人都可以查看
+    // 如果是草稿，只有作者才能查看
     const post = await prisma.post.findFirst({
-      where: {
-        id: postId,
-        status: 'PUBLISHED',
-        deletedAt: null,
-      },
+      where: session?.user?.id
+        ? {
+            id: postId,
+            deletedAt: null,
+            OR: [
+              { status: 'PUBLISHED' },
+              {
+                status: 'DRAFT',
+                authorId: BigInt(session.user.id),
+              },
+            ],
+          }
+        : {
+            id: postId,
+            status: 'PUBLISHED',
+            deletedAt: null,
+          },
       include: {
         author: {
           select: {
@@ -90,6 +110,11 @@ async function getPost(id: string) {
       return null;
     }
 
+    // 获取收藏数量
+    const favoritesCount = await prisma.favorite.count({
+      where: { postId: postId },
+    });
+
     // 增加浏览量
     await prisma.post.update({
       where: { id: postId },
@@ -100,6 +125,7 @@ async function getPost(id: string) {
       ...post,
       id: post.id.toString(),
       authorId: post.authorId.toString(),
+      favoritesCount,
       tags: post.tags.map((pt) => pt.tag),
     };
   } catch (error) {
@@ -159,17 +185,22 @@ export default async function PostPage({ params }: PageProps) {
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         {/* 文章头部 */}
         <header className="mb-8">
-          {/* 分类 */}
-          {post.category && (
-            <div className="mb-4">
+          {/* 分类和状态 */}
+          <div className="mb-4 flex items-center gap-2">
+            {post.category && (
               <span
                 className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-white"
                 style={{ backgroundColor: post.category.color }}
               >
                 {post.category.name}
               </span>
-            </div>
-          )}
+            )}
+            {post.status === 'DRAFT' && (
+              <span className="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                草稿
+              </span>
+            )}
+          </div>
 
           {/* 标题 */}
           <h1 className="mb-4 text-4xl font-bold leading-tight text-gray-900">
@@ -209,22 +240,47 @@ export default async function PostPage({ params }: PageProps) {
                       {post.author.username}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {post.publishedAt &&
+                      {post.status === 'PUBLISHED' &&
+                        post.publishedAt &&
                         formatDistanceToNow(new Date(post.publishedAt), {
                           addSuffix: true,
                           locale: zhCN,
                         })}
+                      {post.status === 'DRAFT' && '草稿'}
                     </p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* 阅读统计 */}
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
-              <span>{post.views} 次阅读</span>
-              <span>{post.readingTime} 分钟阅读</span>
-              <span>{post.likesCount} 点赞</span>
+            {/* 阅读统计和操作按钮 */}
+            <div className="flex items-center space-x-4">
+              {post.status === 'PUBLISHED' && (
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <span>{post.views} 次阅读</span>
+                  <span>{post.readingTime} 分钟阅读</span>
+                  <span>{post.likesCount} 点赞</span>
+                </div>
+              )}
+              {post.status === 'DRAFT' && (
+                <div className="flex items-center space-x-2">
+                  <a
+                    href={`/posts/edit/${post.id}`}
+                    className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  >
+                    编辑草稿
+                  </a>
+                  <button
+                    className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+                    onClick={() => {
+                      // TODO: 实现发布功能
+                      alert('发布功能待实现');
+                    }}
+                  >
+                    发布
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -333,6 +389,23 @@ export default async function PostPage({ params }: PageProps) {
             </div>
           </div>
         )}
+
+        {/* 点赞和收藏 */}
+        <div className="border-t border-gray-200 pt-8">
+          <div className="flex justify-center">
+            <LikeAndFavorite
+              postId={post.id}
+              initialLikes={post.likesCount}
+              initialFavorites={post.favoritesCount}
+              className="justify-center"
+            />
+          </div>
+        </div>
+
+        {/* 评论系统 */}
+        <div className="border-t border-gray-200 pt-8">
+          <Comments postId={post.id} initialCount={post.commentsCount} />
+        </div>
 
         {/* 作者简介 */}
         {post.author && post.author.bio && (
