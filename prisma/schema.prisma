@@ -34,6 +34,8 @@ model User {
   profile       UserProfile?
   postViews     PostView[]
   notifications Notification[]
+  searchLogs    SearchLog[]
+  recommendationLogs RecommendationLog[]
 
   @@index([username])
   @@index([email])
@@ -108,6 +110,7 @@ model Post {
   favorites Favorite[]
   tags      PostTag[]
   postViews PostView[]
+  recommendationLogs RecommendationLog[]
 
   @@unique([authorId, slug])
   @@index([status])
@@ -253,6 +256,62 @@ model Notification {
   @@map("notifications")
 }
 
+// 搜索相关模型
+model SearchLog {
+  id         BigInt   @id @default(autoincrement())
+  query      String   @db.VarChar(200)
+  userId     BigInt?  @map("user_id")
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  userAgent  String?  @map("user_agent") @db.Text
+  resultsCount Int    @default(0) @map("results_count")
+  responseTime Int?   @map("response_time") // 响应时间（毫秒）
+  filters    Json?    // 搜索筛选条件
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // 级联删除：删除用户时设置用户ID为null
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([query])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([resultsCount])
+  @@map("search_logs")
+}
+
+model SearchSuggestion {
+  id          BigInt   @id @default(autoincrement())
+  keyword     String   @unique @db.VarChar(100)
+  searchCount Int      @default(1) @map("search_count")
+  resultsCount Int     @default(0) @map("results_count")
+  lastUsedAt  DateTime @default(now()) @map("last_used_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([keyword])
+  @@index([searchCount])
+  @@index([lastUsedAt])
+  @@map("search_suggestions")
+}
+
+// 推荐相关模型
+model RecommendationLog {
+  id         BigInt             @id @default(autoincrement())
+  userId     BigInt             @map("user_id")
+  postId     BigInt             @map("post_id")
+  algorithm  RecommendationType @map("algorithm")
+  score      Float              @default(0.0)
+  clicked    Boolean            @default(false)
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  // 级联删除关系
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  post Post? @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([postId])
+  @@index([createdAt])
+  @@map("recommendation_logs")
+}
+
 // 枚举类型
 enum Role {
   USER
@@ -290,4 +349,13 @@ enum NotificationType {
   LIKE
   FOLLOW
   SYSTEM
+}
+
+enum RecommendationType {
+  CONTENT_BASED    // 基于内容的推荐
+  COLLABORATIVE    // 协同过滤推荐
+  POPULAR         // 热门推荐
+  USER_BEHAVIOR   // 基于用户行为推荐
+  SIMILAR_TAGS    // 基于相似标签推荐
+  SIMILAR_CATEGORY // 基于相似分类推荐
 }
